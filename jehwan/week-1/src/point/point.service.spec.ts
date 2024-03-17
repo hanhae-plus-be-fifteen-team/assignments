@@ -70,7 +70,12 @@ describe('PointService', () => {
         expect(pointAfterCharge).toBe(accumulates[parseInt(i) + 1])
       }
     })
-    it.todo('Fail to use a point if the balance is insufficient')
+    it('Fail to use a point if the balance is insufficient', async () => {
+      const userId = 1
+      const amount = 20000
+
+      await expect(pointService.use(userId, amount)).rejects.toThrow(Error)
+    })
   })
 
   describe('PointService.readPoint()', () => {
