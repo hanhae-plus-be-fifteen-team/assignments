@@ -53,9 +53,13 @@ describe('PointController', () => {
 
     expect(histories.map(history => history.type)).toEqual(want)
   })
-  it.todo(
-    'Succeed to return the point balance after charge when PointController.charge() is called',
-  )
+  it('Succeed to return the point balance after charge when PointController.charge() is called', async () => {
+    const userId = '1'
+    const amount = 50000
+    const userPoint = await pointController.charge(userId, { amount })
+
+    expect(userPoint.point).toBe(102000)
+  })
   it.todo(
     'Succeed to return the point balance after use when PointController.use() is called',
   )
