@@ -65,6 +65,6 @@ export class PointService {
    * @returns user's histories
    */
   async readHistories(userId: number): Promise<PointHistory[]> {
-    return []
+    return this.pointHistoryTable.selectAllByUserId(userId)
   }
 }
