@@ -5,6 +5,8 @@ import { PointHistoryTable } from '../database/pointhistory.table'
 
 @Injectable()
 export class PointService {
+  private writeLock: boolean = false
+
   constructor(
     private readonly userPointTable: UserPointTable,
     private readonly pointHistoryTable: PointHistoryTable,
@@ -80,5 +82,23 @@ export class PointService {
    */
   async readHistories(userId: number): Promise<PointHistory[]> {
     return this.pointHistoryTable.selectAllByUserId(userId)
+  }
+
+  /**
+   *
+   * busy waiting
+   * @param interval checking interval (default 10ms)
+   */
+  private waitWriteLock(interval?: number) {
+    return new Promise(resolve => {
+      const checkLock = () => {
+        if (this.writeLock) {
+          setTimeout(checkLock, interval ?? 10)
+        } else {
+          resolve(true)
+        }
+      }
+      checkLock()
+    })
   }
 }
