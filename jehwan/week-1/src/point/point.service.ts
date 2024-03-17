@@ -52,7 +52,7 @@ export class PointService {
    * @returns user's point
    */
   async readPoint(userId: number): Promise<UserPoint> {
-    return undefined
+    return this.userPointTable.selectById(userId)
   }
 
   /**
