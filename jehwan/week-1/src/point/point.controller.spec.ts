@@ -16,6 +16,15 @@ describe('PointController', () => {
     pointService = app.get<PointService>(PointService)
   })
 
+  beforeEach(async () => {
+    // create initial data
+    const userId = 1
+    await pointService.charge(userId, 10000)
+    await pointService.use(userId, 5000)
+    await pointService.use(userId, 3000)
+    await pointService.charge(userId, 50000)
+  })
+
   it.todo(
     'Succeed to return the point balance when PointController.point() is called',
   )
