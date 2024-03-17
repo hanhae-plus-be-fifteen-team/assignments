@@ -65,9 +65,9 @@ export class PointController {
       return await this.pointService.use(userId, amount)
     } catch (e) {
       if (e.message === 'Limit Exceeded') {
-        throw new BadRequestException(e.name, { cause: e })
+        throw new BadRequestException(e.message, { cause: e })
       }
-      throw new InternalServerErrorException(e.name, { cause: e })
+      throw new InternalServerErrorException(e.message, { cause: e })
     }
   }
 }
