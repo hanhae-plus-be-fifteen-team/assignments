@@ -30,7 +30,14 @@ export class PointService {
    * @returns balance after use
    */
   async use(userId: number, amount: number): Promise<number> {
-    return 0
+    const userPointBeforeUpsert = await this.userPointTable.selectById(userId)
+
+    const userPointAfterUpsert = await this.userPointTable.insertOrUpdate(
+      userId,
+      userPointBeforeUpsert.point - amount,
+    )
+
+    return userPointAfterUpsert.point
   }
 
   /**
