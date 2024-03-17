@@ -1,12 +1,13 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { PointService } from './point.service'
+import { UserPointTable } from '../database/userpoint.table'
 
 describe('PointService', () => {
   let pointService: PointService
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
-      providers: [PointService],
+      providers: [PointService, UserPointTable],
     }).compile()
 
     pointService = app.get<PointService>(PointService)
