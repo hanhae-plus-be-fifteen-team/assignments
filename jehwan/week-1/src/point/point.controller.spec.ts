@@ -4,6 +4,7 @@ import { PointService } from './point.service'
 
 describe('PointController', () => {
   let pointController: PointController
+  let pointService: PointService
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
@@ -12,6 +13,7 @@ describe('PointController', () => {
     }).compile()
 
     pointController = app.get<PointController>(PointController)
+    pointService = app.get<PointService>(PointService)
   })
 
   it.todo(
