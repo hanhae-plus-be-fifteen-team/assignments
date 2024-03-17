@@ -60,9 +60,13 @@ describe('PointController', () => {
 
     expect(userPoint.point).toBe(102000)
   })
-  it.todo(
-    'Succeed to return the point balance after use when PointController.use() is called',
-  )
+  it('Succeed to return the point balance after use when PointController.use() is called', async () => {
+    const userId = '1'
+    const amount = 30000
+    const userPoint = await pointController.use(userId, { amount })
+
+    expect(userPoint.point).toBe(22000)
+  })
   it.todo(
     'Throw BadRequestException call PointController.use() if the balance is insufficient',
   )
