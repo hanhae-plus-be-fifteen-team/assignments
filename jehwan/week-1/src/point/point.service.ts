@@ -54,6 +54,13 @@ export class PointService {
       pointToUpsert,
     )
 
+    await this.pointHistoryTable.insert(
+      userId,
+      amount,
+      TransactionType.USE,
+      userPointAfterUpsert.updateMillis,
+    )
+
     return userPointAfterUpsert.point
   }
 
