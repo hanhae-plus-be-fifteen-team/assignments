@@ -20,7 +20,8 @@ export class PointController {
   @Get(':id')
   async point(@Param('id') id: string): Promise<UserPoint> {
     const userId = Number.parseInt(id)
-    return { id: userId, point: 0, updateMillis: Date.now() }
+
+    return this.pointService.readPoint(userId)
   }
 
   /**
