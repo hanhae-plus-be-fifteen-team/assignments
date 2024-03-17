@@ -13,4 +13,20 @@ describe('PointController', () => {
 
     pointController = app.get<PointController>(PointController)
   })
+
+  it.todo(
+    'Succeed to return the point balance when PointController.point() is called',
+  )
+  it.todo(
+    'Succeed to return the point histories when PointController.history() is called',
+  )
+  it.todo(
+    'Succeed to return the point balance after charge when PointController.charge() is called',
+  )
+  it.todo(
+    'Succeed to return the point balance after use when PointController.use() is called',
+  )
+  it.todo(
+    'Throw BadRequestException call PointController.use() if the balance is insufficient',
+  )
 })
