@@ -95,7 +95,14 @@ describe('AppController (e2e)', () => {
       requests.sort((a, b) => a.body.point - b.body.point)
       expect(requests.map(r => r.body.point).at(0)).toBe(8500)
     })
-    it.todo('Return BadRequest when if the balance is insufficient')
+    it('Return BadRequest when if the balance is insufficient', async () => {
+      request(app.getHttpServer())
+        .patch('/point/1/use')
+        .send({
+          amount: 99999,
+        })
+        .expect(400)
+    })
   })
   describe('GET /point/{id}', () => {
     it.todo('Return a user point matching the given {id}.')
