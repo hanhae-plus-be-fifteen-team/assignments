@@ -59,6 +59,7 @@ export class PointService {
     const pointToUpsert = userPointBeforeUpsert.point - amount
 
     if (pointToUpsert < 0) {
+      this.writeLock = false
       throw new Error('Limit Exceeded')
     }
 
