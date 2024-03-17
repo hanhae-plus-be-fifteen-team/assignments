@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { PointService } from './point.service'
 import { UserPointTable } from '../database/userpoint.table'
+import { TransactionType } from './point.model'
 
 describe('PointService', () => {
   let pointService: PointService
@@ -107,6 +108,15 @@ describe('PointService', () => {
       await pointService.use(userId, 8000)
     })
 
-    it.todo("Succeed to read user's histories")
+    it("Succeed to read user's histories", async () => {
+      const userId = 1
+
+      const histories = await pointService.readHistories(userId)
+
+      expect(histories[0].type).toBe(TransactionType.CHARGE)
+      expect(histories[1].type).toBe(TransactionType.CHARGE)
+      expect(histories[2].type).toBe(TransactionType.USE)
+      expect(histories[3].type).toBe(TransactionType.USE)
+    })
   })
 })
