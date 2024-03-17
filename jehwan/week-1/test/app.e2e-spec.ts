@@ -81,7 +81,20 @@ describe('AppController (e2e)', () => {
           }
         })
     })
-    it.todo('Use user points concurrently for the given {id}.')
+    it('Use user points concurrently for the given {id}.', async () => {
+      const requests = await Promise.all(
+        Array.from({ length: 3 }, (_, i) => {
+          return request(app.getHttpServer()).patch('/point/1/use').send({
+            amount: 500,
+          })
+        }),
+      )
+
+      // If sorted by amount, the smallest result should be 8500.
+      // The order of calling is not important.
+      requests.sort((a, b) => a.body.point - b.body.point)
+      expect(requests.map(r => r.body.point).at(0)).toBe(8500)
+    })
     it.todo('Return BadRequest when if the balance is insufficient')
   })
   describe('GET /point/{id}', () => {
