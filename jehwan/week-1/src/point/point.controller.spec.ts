@@ -4,6 +4,7 @@ import { PointService } from './point.service'
 import { PointHistoryTable } from '../database/pointhistory.table'
 import { UserPointTable } from '../database/userpoint.table'
 import { TransactionType } from './point.model'
+import { BadRequestException } from '@nestjs/common'
 
 describe('PointController', () => {
   let pointController: PointController
@@ -67,7 +68,12 @@ describe('PointController', () => {
 
     expect(userPoint.point).toBe(22000)
   })
-  it.todo(
-    'Throw BadRequestException call PointController.use() if the balance is insufficient',
-  )
+  it('Throw BadRequestException call PointController.use() if the balance is insufficient', async () => {
+    const userId = '1'
+    const amount = 99999
+
+    await expect(pointController.use(userId, { amount })).rejects.toThrow(
+      BadRequestException,
+    )
+  })
 })
