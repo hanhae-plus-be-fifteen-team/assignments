@@ -16,7 +16,27 @@ describe('AppController (e2e)', () => {
   })
 
   describe('PATCH /point/{id}/charge', () => {
-    it.todo('Charge a user point matching the given {id}.')
+    it('Charge a user point matching the given {id}.', async () => {
+      const beforeCharge = new Date().getTime()
+
+      await request(app.getHttpServer())
+        .patch('/point/1/charge')
+        .send({
+          amount: 10000,
+        })
+        .expect(200)
+        .expect(res => {
+          if (res.body.id !== 1) {
+            throw new Error('The id does not match')
+          }
+          if (res.body.point !== 10000) {
+            throw new Error('The point does not match')
+          }
+          if (res.body.updateMillis < beforeCharge) {
+            throw new Error('The updateMillis is incorrect')
+          }
+        })
+    })
     it.todo('Charge user points concurrently for the given {id}.')
   })
   describe('PATCH /point/{id}/use', () => {
