@@ -13,8 +13,14 @@ export class PointService {
    * @returns balance after charge
    */
   async charge(userId: number, amount: number): Promise<number> {
-    const userPoint = await this.userPointTable.insertOrUpdate(userId, amount)
-    return userPoint.point
+    const userPointBeforeUpsert = await this.userPointTable.selectById(userId)
+
+    const userPointAfterUpsert = await this.userPointTable.insertOrUpdate(
+      userId,
+      userPointBeforeUpsert.point + amount,
+    )
+
+    return userPointAfterUpsert.point
   }
 
   /**
