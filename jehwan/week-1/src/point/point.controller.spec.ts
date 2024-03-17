@@ -3,6 +3,7 @@ import { PointController } from './point.controller'
 import { PointService } from './point.service'
 import { PointHistoryTable } from '../database/pointhistory.table'
 import { UserPointTable } from '../database/userpoint.table'
+import { TransactionType } from './point.model'
 
 describe('PointController', () => {
   let pointController: PointController
@@ -40,9 +41,18 @@ describe('PointController', () => {
 
     expect(userPoint.point).toBe(52000)
   })
-  it.todo(
-    'Succeed to return the point histories when PointController.history() is called',
-  )
+  it('Succeed to return the point histories when PointController.history() is called', async () => {
+    const userId = '1'
+    const histories = await pointController.history(userId)
+    const want = [
+      TransactionType.CHARGE,
+      TransactionType.USE,
+      TransactionType.USE,
+      TransactionType.CHARGE,
+    ]
+
+    expect(histories.map(history => history.type)).toEqual(want)
+  })
   it.todo(
     'Succeed to return the point balance after charge when PointController.charge() is called',
   )
