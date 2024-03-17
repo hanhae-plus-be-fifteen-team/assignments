@@ -98,6 +98,15 @@ describe('PointService', () => {
   })
 
   describe('PointService.readHistories()', () => {
+    beforeEach(async () => {
+      // charge points 2 times and use points 2 times
+      const userId = 1
+      await pointService.charge(userId, 10000)
+      await pointService.charge(userId, 25000)
+      await pointService.use(userId, 5000)
+      await pointService.use(userId, 8000)
+    })
+
     it.todo("Succeed to read user's histories")
   })
 })
