@@ -4,7 +4,7 @@ import { UserPointTable } from '../database/userpoint.table'
 
 @Injectable()
 export class PointService {
-  constructor() {}
+  constructor(private readonly userPointTable: UserPointTable) {}
 
   /**
    *
