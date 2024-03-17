@@ -41,6 +41,12 @@ describe('PointService', () => {
   })
 
   describe('PointService.use()', () => {
+    beforeEach(async () => {
+      // charge 10000 before do each case
+      const userId = 1
+      await pointService.charge(userId, 10000)
+    })
+
     it.todo('Succeed to use a point')
     it.todo('Succeed to use points')
     it.todo('Fail to use a point if the balance is insufficient')
