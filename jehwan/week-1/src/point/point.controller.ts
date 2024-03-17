@@ -47,9 +47,7 @@ export class PointController {
     const userId = Number.parseInt(id)
     const amount = pointDto.amount
 
-    await this.pointService.charge(userId, amount)
-
-    return this.pointService.readPoint(userId)
+    return this.pointService.charge(userId, amount)
   }
 
   /**
@@ -64,14 +62,12 @@ export class PointController {
     const amount = pointDto.amount
 
     try {
-      await this.pointService.use(userId, amount)
+      return await this.pointService.use(userId, amount)
     } catch (e) {
       if (e.message === 'Limit Exceeded') {
         throw new BadRequestException(e.name, { cause: e })
       }
       throw new InternalServerErrorException(e.name, { cause: e })
     }
-
-    return this.pointService.readPoint(userId)
   }
 }
