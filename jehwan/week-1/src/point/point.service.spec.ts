@@ -79,7 +79,12 @@ describe('PointService', () => {
   })
 
   describe('PointService.readPoint()', () => {
-    it.todo("Succeed to read a user's point")
+    beforeEach(async () => {
+      // charge 10000 before do each case
+      const userId = 1
+      await pointService.charge(userId, 10000)
+    })
+
   })
 
   describe('PointService.readHistories()', () => {
