@@ -85,6 +85,16 @@ describe('PointService', () => {
       await pointService.charge(userId, 10000)
     })
 
+    it("Succeed to read a user's point", async () => {
+      const userId = 1
+
+      const userPoint = await pointService.readPoint(userId)
+      const afterRequest = new Date().getTime()
+
+      expect(userPoint.id).toBe(userId)
+      expect(userPoint.point).toBe(10000)
+      expect(userPoint.updateMillis).toBeLessThanOrEqual(afterRequest)
+    })
   })
 
   describe('PointService.readHistories()', () => {
