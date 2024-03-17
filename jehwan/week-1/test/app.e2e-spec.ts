@@ -37,7 +37,20 @@ describe('AppController (e2e)', () => {
           }
         })
     })
-    it.todo('Charge user points concurrently for the given {id}.')
+    it('Charge user points concurrently for the given {id}.', async () => {
+      const requests = await Promise.all(
+        Array.from({ length: 10 }, (_, i) => {
+          return request(app.getHttpServer()).patch('/point/1/charge').send({
+            amount: 10000,
+          })
+        }),
+      )
+
+      // If sorted by amount, the largest result should be 10000.
+      // The order of calling is not important.
+      requests.sort((a, b) => a.body.point - b.body.point)
+      expect(requests.map(r => r.body.point).at(-1)).toBe(100000)
+    })
   })
   describe('PATCH /point/{id}/use', () => {
     it.todo('Use a user point matching the given {id}.')
