@@ -15,10 +15,19 @@ describe('AppController (e2e)', () => {
     await app.init()
   })
 
-  it('/ (GET)', () => {
-    return request(app.getHttpServer())
-      .get('/')
-      .expect(200)
-      .expect('Hello World!')
+  describe('PATCH /point/{id}/charge', () => {
+    it.todo('Charge a user point matching the given {id}.')
+    it.todo('Charge user points concurrently for the given {id}.')
+  })
+  describe('PATCH /point/{id}/use', () => {
+    it.todo('Use a user point matching the given {id}.')
+    it.todo('Use user points concurrently for the given {id}.')
+    it.todo('Return BadRequest when if the balance is insufficient')
+  })
+  describe('GET /point/{id}', () => {
+    it.todo('Return a user point matching the given {id}.')
+  })
+  describe('GET /point/{id}/histories', () => {
+    it.todo('Return user histories matching the given {id}.')
   })
 })
