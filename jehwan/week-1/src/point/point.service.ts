@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { PointHistory, UserPoint } from './point.model'
+import { PointHistory, TransactionType, UserPoint } from './point.model'
 import { UserPointTable } from '../database/userpoint.table'
 import { PointHistoryTable } from '../database/pointhistory.table'
 
@@ -22,6 +22,13 @@ export class PointService {
     const userPointAfterUpsert = await this.userPointTable.insertOrUpdate(
       userId,
       userPointBeforeUpsert.point + amount,
+    )
+
+    await this.pointHistoryTable.insert(
+      userId,
+      amount,
+      TransactionType.CHARGE,
+      userPointAfterUpsert.updateMillis,
     )
 
     return userPointAfterUpsert.point
