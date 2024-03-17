@@ -23,7 +23,21 @@ describe('PointService', () => {
 
       expect(pointAfterCharge).toBe(want)
     })
-    it.todo('Succeed to charge points')
+    it('Succeed to charge points', async () => {
+      const userId = 1
+      const amounts = Array.from({ length: 10 }, (_, index) =>
+        Math.floor(Math.random() * 10000),
+      )
+      const accumulates = amounts.reduce<number[]>(
+        (acc, val) => [...acc, acc.at(-1) + val],
+        [0],
+      )
+
+      for (const [i, amount] of Object.entries(amounts)) {
+        const pointAfterCharge = await pointService.charge(userId, amount)
+        expect(pointAfterCharge).toBe(accumulates[parseInt(i) + 1])
+      }
+    })
   })
 
   describe('PointService.use()', () => {
