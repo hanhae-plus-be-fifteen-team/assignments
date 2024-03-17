@@ -23,7 +23,7 @@ describe('PointService', () => {
       // Assume the initial balance is 0.
       const pointAfterCharge = await pointService.charge(userId, amount)
 
-      expect(pointAfterCharge).toBe(want)
+      expect(pointAfterCharge.point).toBe(want)
     })
     it('Succeed to charge points', async () => {
       const userId = 1
@@ -37,7 +37,7 @@ describe('PointService', () => {
 
       for (const [i, amount] of Object.entries(amounts)) {
         const pointAfterCharge = await pointService.charge(userId, amount)
-        expect(pointAfterCharge).toBe(accumulates[parseInt(i) + 1])
+        expect(pointAfterCharge.point).toBe(accumulates[parseInt(i) + 1])
       }
     })
   })
@@ -55,7 +55,7 @@ describe('PointService', () => {
       const rest = 10000 - amount
 
       const pointAfterUse = await pointService.use(userId, amount)
-      expect(pointAfterUse).toBe(rest)
+      expect(pointAfterUse.point).toBe(rest)
     })
     it('Succeed to use points', async () => {
       const userId = 1
@@ -69,7 +69,7 @@ describe('PointService', () => {
 
       for (const [i, amount] of Object.entries(amounts)) {
         const pointAfterCharge = await pointService.use(userId, amount)
-        expect(pointAfterCharge).toBe(accumulates[parseInt(i) + 1])
+        expect(pointAfterCharge.point).toBe(accumulates[parseInt(i) + 1])
       }
     })
     it('Fail to use a point if the balance is insufficient', async () => {

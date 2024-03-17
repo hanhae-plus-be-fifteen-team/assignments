@@ -16,7 +16,7 @@ export class PointService {
    * @param amount amount to charge
    * @returns balance after charge
    */
-  async charge(userId: number, amount: number): Promise<number> {
+  async charge(userId: number, amount: number): Promise<UserPoint> {
     const userPointBeforeUpsert = await this.userPointTable.selectById(userId)
 
     const userPointAfterUpsert = await this.userPointTable.insertOrUpdate(
@@ -31,7 +31,7 @@ export class PointService {
       userPointAfterUpsert.updateMillis,
     )
 
-    return userPointAfterUpsert.point
+    return userPointAfterUpsert
   }
 
   /**
@@ -40,7 +40,7 @@ export class PointService {
    * @param amount amount to use
    * @returns balance after use
    */
-  async use(userId: number, amount: number): Promise<number> {
+  async use(userId: number, amount: number): Promise<UserPoint> {
     const userPointBeforeUpsert = await this.userPointTable.selectById(userId)
 
     const pointToUpsert = userPointBeforeUpsert.point - amount
@@ -61,7 +61,7 @@ export class PointService {
       userPointAfterUpsert.updateMillis,
     )
 
-    return userPointAfterUpsert.point
+    return userPointAfterUpsert
   }
 
   /**
