@@ -34,9 +34,12 @@ describe('PointController', () => {
     await pointService.charge(userId, 50000)
   })
 
-  it.todo(
-    'Succeed to return the point balance when PointController.point() is called',
-  )
+  it('Succeed to return the point balance when PointController.point() is called', async () => {
+    const userId = '1'
+    const userPoint = await pointController.point(userId)
+
+    expect(userPoint.point).toBe(52000)
+  })
   it.todo(
     'Succeed to return the point histories when PointController.history() is called',
   )
