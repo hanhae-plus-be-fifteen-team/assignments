@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { PointController } from './point.controller'
 import { PointService } from './point.service'
+import { PointHistoryTable } from '../database/pointhistory.table'
+import { UserPointTable } from '../database/userpoint.table'
 
 describe('PointController', () => {
   let pointController: PointController
@@ -9,7 +11,14 @@ describe('PointController', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [PointController],
-      providers: [PointService],
+      providers: [
+        PointService,
+        /**
+         * todo consider implementing mocks for in future development
+         */
+        PointHistoryTable,
+        UserPointTable,
+      ],
     }).compile()
 
     pointController = app.get<PointController>(PointController)
