@@ -55,7 +55,21 @@ describe('PointService', () => {
       const pointAfterUse = await pointService.use(userId, amount)
       expect(pointAfterUse).toBe(rest)
     })
-    it.todo('Succeed to use points')
+    it('Succeed to use points', async () => {
+      const userId = 1
+      const amounts = Array.from({ length: 10 }, (_, index) =>
+        Math.floor(Math.random() * 1000),
+      )
+      const accumulates = amounts.reduce<number[]>(
+        (acc, val) => [...acc, acc.at(-1) - val],
+        [10000],
+      )
+
+      for (const [i, amount] of Object.entries(amounts)) {
+        const pointAfterCharge = await pointService.use(userId, amount)
+        expect(pointAfterCharge).toBe(accumulates[parseInt(i) + 1])
+      }
+    })
     it.todo('Fail to use a point if the balance is insufficient')
   })
 
