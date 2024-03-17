@@ -30,15 +30,15 @@ export class PointService {
       userPointBeforeUpsert.point + amount,
     )
 
+    this.writeLock = false
+    // critical section end
+
     await this.pointHistoryTable.insert(
       userId,
       amount,
       TransactionType.CHARGE,
       userPointAfterUpsert.updateMillis,
     )
-
-    this.writeLock = false
-    // critical section end
 
     return userPointAfterUpsert
   }
@@ -68,15 +68,15 @@ export class PointService {
       pointToUpsert,
     )
 
+    this.writeLock = false
+    // critical section end
+
     await this.pointHistoryTable.insert(
       userId,
       amount,
       TransactionType.USE,
       userPointAfterUpsert.updateMillis,
     )
-
-    this.writeLock = false
-    // critical section end
 
     return userPointAfterUpsert
   }
