@@ -19,6 +19,10 @@ export class PointService {
    * @returns balance after charge
    */
   async charge(userId: number, amount: number): Promise<UserPoint> {
+    // critical section
+    await this.waitWriteLock()
+    this.writeLock = true
+
     const userPointBeforeUpsert = await this.userPointTable.selectById(userId)
 
     const userPointAfterUpsert = await this.userPointTable.insertOrUpdate(
@@ -32,6 +36,9 @@ export class PointService {
       TransactionType.CHARGE,
       userPointAfterUpsert.updateMillis,
     )
+
+    this.writeLock = false
+    // critical section end
 
     return userPointAfterUpsert
   }
