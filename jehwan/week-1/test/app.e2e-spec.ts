@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 import { AppModule } from '../src/app.module'
+import { TransactionType } from '../src/point/point.model'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
@@ -133,6 +134,30 @@ describe('AppController (e2e)', () => {
     })
   })
   describe('GET /point/{id}/histories', () => {
-    it.todo('Return user histories matching the given {id}.')
+    beforeEach(async () => {
+      // charge before test
+      await request(app.getHttpServer()).patch('/point/1/charge').send({
+        amount: 10000,
+      })
+      await request(app.getHttpServer()).patch('/point/1/use').send({
+        amount: 1000,
+      })
+    })
+
+    it('Return user histories matching the given {id}.', async () => {
+      await request(app.getHttpServer())
+        .get('/point/1/histories')
+        .expect(200)
+        .expect(res => {
+          const [h1, h2] = res.body
+
+          if (h1.type !== TransactionType.CHARGE) {
+            throw new Error('The first history is incorrect')
+          }
+          if (h2.type !== TransactionType.USE) {
+            throw new Error('The second history is incorrect')
+          }
+        })
+    })
   })
 })
