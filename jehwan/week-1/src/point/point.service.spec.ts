@@ -1,6 +1,27 @@
+import { Test, TestingModule } from '@nestjs/testing'
+import { PointService } from './point.service'
+
 describe('PointService', () => {
+  let pointService: PointService
+
+  beforeEach(async () => {
+    const app: TestingModule = await Test.createTestingModule({
+      providers: [PointService],
+    }).compile()
+
+    pointService = app.get<PointService>(PointService)
+  })
+
   describe('PointService.charge()', () => {
-    it.todo('Succeed to charge a point')
+    it('Succeed to charge a point', async () => {
+      const userId = 1
+      const amount = 1000
+      const want = 1000
+      // Assume the initial balance is 0.
+      const pointAfterCharge = await pointService.charge(userId, amount)
+
+      expect(pointAfterCharge).toBe(want)
+    })
     it.todo('Succeed to charge points')
   })
 
