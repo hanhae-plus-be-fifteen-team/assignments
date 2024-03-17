@@ -103,6 +103,7 @@ describe('AppController (e2e)', () => {
           amount: 99999,
         })
         .expect(400)
+        .end(() => {})
     })
   })
   describe('GET /point/{id}', () => {
