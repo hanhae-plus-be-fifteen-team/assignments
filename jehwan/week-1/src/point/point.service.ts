@@ -32,9 +32,15 @@ export class PointService {
   async use(userId: number, amount: number): Promise<number> {
     const userPointBeforeUpsert = await this.userPointTable.selectById(userId)
 
+    const pointToUpsert = userPointBeforeUpsert.point - amount
+
+    if (pointToUpsert < 0) {
+      throw new Error('Limit Exceeded')
+    }
+
     const userPointAfterUpsert = await this.userPointTable.insertOrUpdate(
       userId,
-      userPointBeforeUpsert.point - amount,
+      pointToUpsert,
     )
 
     return userPointAfterUpsert.point
