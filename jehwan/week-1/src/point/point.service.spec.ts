@@ -47,7 +47,14 @@ describe('PointService', () => {
       await pointService.charge(userId, 10000)
     })
 
-    it.todo('Succeed to use a point')
+    it('Succeed to use a point', async () => {
+      const userId = 1
+      const amount = Math.floor(Math.random() * 10000)
+      const rest = 10000 - amount
+
+      const pointAfterUse = await pointService.use(userId, amount)
+      expect(pointAfterUse).toBe(rest)
+    })
     it.todo('Succeed to use points')
     it.todo('Fail to use a point if the balance is insufficient')
   })
