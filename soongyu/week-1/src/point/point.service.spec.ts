@@ -27,4 +27,21 @@ describe('UserPointService', () => {
       expect(userPoint.updateMillis).toBeLessThan(Date.now())
     })
   })
+
+  describe('chargePoint', () => {
+    it('charge', async () => {
+      const userId = 1
+      await service.chargePoint(userId, { amount: 100 })
+      await service.chargePoint(userId, { amount: 200 })
+      const userPoint = await service.chargePoint(userId, { amount: 300 })
+      expect(userPoint.point).toEqual(600)
+    })
+
+    it('Amount is wrong', async () => {
+      const userId = 1
+      await expect(async () => {
+        await service.chargePoint(userId, { amount: -300 })
+      }).rejects.toThrowError(new Error('양의 정수만 입력 가능합니다.'))
+    })
+  })
 })
