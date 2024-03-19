@@ -17,4 +17,14 @@ describe('UserPointService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined()
   })
+
+  describe('getUserPoint', () => {
+    it('getUserPoint', async () => {
+      const userId = 1
+      const userPoint = await service.getUserPoint(userId)
+      expect(userPoint.id).toEqual(1)
+      expect(userPoint.point).toEqual(0)
+      expect(userPoint.updateMillis).toBeLessThan(Date.now())
+    })
+  })
 })
