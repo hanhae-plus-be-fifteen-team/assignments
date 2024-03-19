@@ -58,4 +58,17 @@ describe('PointService', () => {
       expect(history[3].type).toBe(TransactionType.CHARGE)
     })
   })
+
+  describe('charge', () => {
+    const userId = 1
+    const amount1 = 0
+    const amount2 = 100
+
+    it('succeed to charge', async () => {
+      const p1 = await service.charge(userId, amount1)
+      expect(p1.point).toBe(amount1)
+      const p2 = await service.charge(userId, amount2)
+      expect(p2.point).toBe(amount2)
+    })
+  })
 })
