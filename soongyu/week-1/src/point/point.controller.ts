@@ -8,7 +8,7 @@ import {
 } from '@nestjs/common'
 import { PointHistory, UserPoint } from './point.model'
 import { PointBody as PointDto } from './point.dto'
-import { UserPointService } from 'src/point/point.service'
+import { UserPointService } from '../point/point.service'
 
 @Controller('/point')
 export class PointController {
