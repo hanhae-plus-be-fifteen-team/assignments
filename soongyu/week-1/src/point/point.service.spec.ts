@@ -44,4 +44,31 @@ describe('UserPointService', () => {
       }).rejects.toThrowError(new Error('양의 정수만 입력 가능합니다.'))
     })
   })
+
+  describe('usePoint', () => {
+    beforeEach(async () => {
+      await service.chargePoint(1, { amount: 1000 })
+    })
+    it('use', async () => {
+      const userId = 1
+      await service.usePoint(userId, { amount: 100 })
+      await service.usePoint(userId, { amount: 200 })
+      const userPoint = await service.usePoint(userId, { amount: 700 })
+      expect(userPoint.point).toEqual(0)
+    })
+
+    it('Amount is wrong', async () => {
+      const userId = 1
+      await expect(async () => {
+        await service.usePoint(userId, { amount: -300 })
+      }).rejects.toThrowError(new Error('양의 정수만 입력 가능합니다.'))
+    })
+
+    it('Not enough point', async () => {
+      const userId = 1
+      await expect(async () => {
+        await service.usePoint(userId, { amount: 1100 })
+      }).rejects.toThrowError(new Error('포인트가 부족합니다.'))
+    })
+  })
 })
