@@ -15,6 +15,10 @@ export class UserPointService {
     return await this.userDb.selectById(id)
   }
 
+  async getUserPointHistory(id: number): Promise<PointHistory[]> {
+    return await this.historyDb.selectAllByUserId(id)
+  }
+
   async chargePoint(id: number, pointDto: PointDto): Promise<UserPoint> {
     const addedAmount = pointDto.amount
     if (addedAmount <= 0) {
