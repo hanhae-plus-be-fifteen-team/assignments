@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common'
 import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { PointModule } from './point/point.module'
-import { UserPointService } from './userpoint/userpoint.service'
+import { UserPointService } from './point/point.service'
 
 @Module({
   imports: [PointModule],
