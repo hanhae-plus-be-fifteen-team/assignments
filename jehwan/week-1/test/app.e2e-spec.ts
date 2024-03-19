@@ -47,7 +47,7 @@ describe('AppController (e2e)', () => {
         }),
       )
 
-      // If sorted by amount, the largest result should be 10000.
+      // If sorted by amount, the largest result should be 100000.
       // The order of calling is not important.
       requests.sort((a, b) => a.body.point - b.body.point)
       expect(requests.map(r => r.body.point).at(-1)).toBe(100000)
