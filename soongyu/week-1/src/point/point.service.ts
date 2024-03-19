@@ -14,4 +14,19 @@ export class UserPointService {
   async getUserPoint(id: number): Promise<UserPoint> {
     return await this.userDb.selectById(id)
   }
+
+  async chargePoint(id: number, pointDto: PointDto): Promise<UserPoint> {
+    const addedAmount = pointDto.amount
+    if (addedAmount <= 0) {
+      throw new Error('양의 정수만 입력 가능합니다.')
+    }
+    const prevUserPoint: number = (await this.getUserPoint(id)).point
+    await this.historyDb.insert(
+      id,
+      addedAmount,
+      TransactionType.CHARGE,
+      Date.now(),
+    )
+    return await this.userDb.insertOrUpdate(id, prevUserPoint + addedAmount)
+  }
 }
