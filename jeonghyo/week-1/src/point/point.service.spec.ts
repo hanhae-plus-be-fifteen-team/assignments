@@ -67,4 +67,33 @@ describe('PointService', () => {
       expect(secondCharge.point).toEqual(1500);
     });
   });
+
+  describe('PointService.use()', () => {
+    beforeEach(async () => {
+      await service.charge(1, 5000);
+    });
+    // 음수 입력 상황 테스트
+    it('Use Amount Check', async () => {
+      try{
+        await service.use(1, -1000);
+      } catch(e) {
+        expect(e).toBeInstanceOf(Error);
+        expect(e.message).toEqual('amount should larger then 0');
+      }      
+    });
+    // 포인트 사용 테스트
+    it('Use Point Check', async () => {
+      const usePoint = await service.use(1, 1000);
+      expect(usePoint.point).toEqual(4000);
+    });
+    // 보유 포인트보다 많이 사용한 상황 테스트
+    it('Use More Point Check', async () => {
+      try{
+        await service.use(1, 6000);
+      } catch(e) {
+        expect(e).toBeInstanceOf(Error);
+        expect(e.message).toEqual('Balance Insufficient');
+      }
+    });
+  });
 });
