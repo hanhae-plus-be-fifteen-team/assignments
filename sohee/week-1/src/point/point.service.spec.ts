@@ -38,4 +38,24 @@ describe('PointService', () => {
       }
     })
   })
+  describe('getHistory', () => {
+    const userId = 1
+    const amount1 = 0
+    const amount2 = 100
+    const amount3 = 5 // use
+    const amount4 = 30
+
+    it('get all history', async () => {
+      await service.charge(userId, amount1)
+      await service.charge(userId, amount2)
+      await service.use(userId, amount3)
+      await service.charge(userId, amount4)
+
+      const history = await service.getHistory(userId)
+      expect(history[0].type).toBe(TransactionType.CHARGE)
+      expect(history[1].type).toBe(TransactionType.CHARGE)
+      expect(history[2].type).toBe(TransactionType.USE)
+      expect(history[3].type).toBe(TransactionType.CHARGE)
+    })
+  })
 })
