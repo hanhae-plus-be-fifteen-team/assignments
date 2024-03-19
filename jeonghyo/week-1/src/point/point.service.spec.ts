@@ -111,16 +111,26 @@ describe('PointService', () => {
       expect(userHistory.length).toEqual(5);
 
       // 요청한 순서대로 내역이 입력되었는지 확인
-      expect(userHistory[0].type).toEqual(TransactionType.CHARGE);
-      expect(userHistory[0].amount).toEqual(10000);
-      expect(userHistory[1].type).toEqual(TransactionType.CHARGE);
-      expect(userHistory[1].amount).toEqual(1000);
-      expect(userHistory[2].type).toEqual(TransactionType.USE);
-      expect(userHistory[2].amount).toEqual(2000);
-      expect(userHistory[3].type).toEqual(TransactionType.USE);
-      expect(userHistory[3].amount).toEqual(3000);
-      expect(userHistory[4].type).toEqual(TransactionType.CHARGE);
-      expect(userHistory[4].amount).toEqual(4000);
+      expect(userHistory[0]).toMatchObject({
+        type: TransactionType.CHARGE,
+        amount: 10000
+      });
+      expect(userHistory[1]).toMatchObject({
+        type: TransactionType.CHARGE,
+        amount: 1000
+      });
+      expect(userHistory[2]).toMatchObject({
+        type: TransactionType.USE,
+        amount: 2000
+      });
+      expect(userHistory[3]).toMatchObject({
+        type: TransactionType.USE,
+        amount: 3000
+      });
+      expect(userHistory[4]).toMatchObject({
+        type: TransactionType.CHARGE,
+        amount: 4000
+      });
     });
   });
 });
