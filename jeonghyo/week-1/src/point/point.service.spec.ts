@@ -48,4 +48,23 @@ describe('PointService', () => {
       expect(userHistory_1[1].type).toEqual(TransactionType.USE);
     });
   });
+
+  describe('PointService.charge()', () => {
+    // 음수 입력 상황 테스트
+    it('Charge Amount Check', async () => {
+      try{
+        await service.charge(1, -1000);
+      } catch(e) {
+        expect(e).toBeInstanceOf(Error);
+        expect(e.message).toEqual('amount should larger then 0');
+      }      
+    });
+    // 포인트 충전 테스트
+    it('Charge Point Check', async () => {
+      const firstCharge = await service.charge(1, 1000);
+      expect(firstCharge.point).toEqual(1000);
+      const secondCharge = await service.charge(1, 500);
+      expect(secondCharge.point).toEqual(1500);
+    });
+  });
 });
