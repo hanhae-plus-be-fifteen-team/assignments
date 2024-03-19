@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing'
 import { UserPointService } from './point.service'
 import { UserPointTable } from '../database/userpoint.table'
 import { PointHistoryTable } from '../database/pointhistory.table'
+import { TransactionType } from './point.model'
 
 describe('UserPointService', () => {
   let service: UserPointService
@@ -69,6 +70,30 @@ describe('UserPointService', () => {
       await expect(async () => {
         await service.usePoint(userId, { amount: 1100 })
       }).rejects.toThrowError(new Error('포인트가 부족합니다.'))
+    })
+  })
+
+  describe('getUserPointHistory', () => {
+    beforeEach(async () => {
+      await service.chargePoint(1, { amount: 1000 })
+      await service.usePoint(1, { amount: 100 })
+      await service.chargePoint(2, { amount: 200 })
+      await service.usePoint(2, { amount: 70 })
+      await service.chargePoint(2, { amount: 200 })
+    })
+    it('getUserPointHistory', async () => {
+      const pointInfo1 = await service.getUserPointHistory(1)
+      const pointInfo2 = await service.getUserPointHistory(2)
+
+      expect(pointInfo1[0].type).toEqual(TransactionType.CHARGE)
+      expect(pointInfo1[1].type).toEqual(TransactionType.USE)
+      expect(pointInfo1[1].amount).toEqual(100)
+      expect((await service.getUserPoint(1)).point).toEqual(900)
+
+      expect(pointInfo2[0].type).toEqual(TransactionType.CHARGE)
+      expect(pointInfo2[1].type).toEqual(TransactionType.USE)
+      expect(pointInfo2[2].type).toEqual(TransactionType.CHARGE)
+      expect((await service.getUserPoint(2)).point).toEqual(330)
     })
   })
 })
