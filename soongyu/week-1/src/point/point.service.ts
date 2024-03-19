@@ -10,4 +10,8 @@ export class UserPointService {
     private readonly userDb: UserPointTable,
     private readonly historyDb: PointHistoryTable,
   ) {}
+
+  async getUserPoint(id: number): Promise<UserPoint> {
+    return await this.userDb.selectById(id)
+  }
 }
