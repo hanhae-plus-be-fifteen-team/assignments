@@ -96,4 +96,31 @@ describe('PointService', () => {
       }
     });
   });
+
+  describe('Sequential Execution Test', () => {
+    beforeEach(async () => {
+      await service.charge(1, 10000);
+      await service.charge(1, 1000);
+      await service.use(1, 2000);
+      await service.use(1, 3000);
+      await service.charge(1, 4000);
+    });
+    it('Sequential Execution Check', async () => {
+      const userHistory = await service.history(1);
+      // 요청한 포인트 사용 내역이 모두 입력되었는지 확인
+      expect(userHistory.length).toEqual(5);
+
+      // 요청한 순서대로 내역이 입력되었는지 확인
+      expect(userHistory[0].type).toEqual(TransactionType.CHARGE);
+      expect(userHistory[0].amount).toEqual(10000);
+      expect(userHistory[1].type).toEqual(TransactionType.CHARGE);
+      expect(userHistory[1].amount).toEqual(1000);
+      expect(userHistory[2].type).toEqual(TransactionType.USE);
+      expect(userHistory[2].amount).toEqual(2000);
+      expect(userHistory[3].type).toEqual(TransactionType.USE);
+      expect(userHistory[3].amount).toEqual(3000);
+      expect(userHistory[4].type).toEqual(TransactionType.CHARGE);
+      expect(userHistory[4].amount).toEqual(4000);
+    });
+  });
 });
