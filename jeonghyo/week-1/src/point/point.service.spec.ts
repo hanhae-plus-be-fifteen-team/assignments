@@ -1,5 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { PointService } from './point.service';
+import { UserPointTable } from "../database/userpoint.table";
+import { PointHistoryTable } from "../database/pointhistory.table";
 import { TransactionType } from './point.model';
 
 describe('PointService', () => {
@@ -7,7 +9,7 @@ describe('PointService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [PointService],
+      providers: [PointService, UserPointTable, PointHistoryTable],
     }).compile();
 
     service = module.get<PointService>(PointService);
@@ -17,16 +19,15 @@ describe('PointService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('PointService.point()', () => {
-    beforeEach(async () => {
-      const userId = 1;
-      await service.charge(userId, 1000);
-    });
-    // 포인트 입력 테스트
+  describe('PointService.point()', () => {  
+    // 아이디별 포인트 조회 테스트
     it('Point Check', async  () => {
+      await service.charge(1, 1000);
       const userPoint = await service.point(1);
-      expect(userPoint.id).toEqual(1);
-      expect(userPoint.point).toEqual(1000);
+      expect(userPoint).toMatchObject({
+        id: 1,
+        point: 1000
+      });
     });
   });
 
@@ -42,10 +43,14 @@ describe('PointService', () => {
       const userHistory_1 = await service.history(1);
       expect(userHistory_1).toBeInstanceOf(Array);
       expect(userHistory_1.length).toEqual(2);
-      expect(userHistory_1[0].userId).toEqual(1);
-      expect(userHistory_1[0].type).toEqual(TransactionType.CHARGE);
-      expect(userHistory_1[1].userId).toEqual(1);
-      expect(userHistory_1[1].type).toEqual(TransactionType.USE);
+      expect(userHistory_1[0]).toMatchObject({
+        userId: 1,
+        type: TransactionType.CHARGE
+      });
+      expect(userHistory_1[1]).toMatchObject({
+        userId: 1,
+        type: TransactionType.USE
+      });
     });
   });
 
