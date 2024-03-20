@@ -35,7 +35,8 @@ describe('PointService', () => {
       try {
         await service.getOne(2).then(_ => _.point)
       } catch (e) {
-        expect(e).toBe('올바르지 않은 ID 값 입니다.')
+        expect(e).toBeInstanceOf(Error)
+        expect(e.message).toEqual('올바르지 않은 ID 값 입니다.')
       }
     })
   })
