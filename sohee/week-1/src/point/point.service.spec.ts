@@ -3,6 +3,7 @@ import { PointService } from './point.service'
 import { UserPointTable } from '../database/userpoint.table'
 import { PointHistoryTable } from '../database/pointhistory.table'
 import { TransactionType } from './point.model'
+import { BadRequestException } from '@nestjs/common/exceptions'
 
 describe('PointService', () => {
   let service: PointService
@@ -40,6 +41,7 @@ describe('PointService', () => {
       }
     })
   })
+
   describe('getHistory', () => {
     const userId = 1
     const amount1 = 0
@@ -65,6 +67,7 @@ describe('PointService', () => {
     const userId = 1
     const amount1 = 0
     const amount2 = 100
+    const amount3 = -100
     beforeEach(async () => {
       await service.charge(userId, amount1)
     })
@@ -72,6 +75,20 @@ describe('PointService', () => {
     it('succeed to charge', async () => {
       const p2 = await service.charge(userId, amount2)
       expect(p2.point).toBe(amount2)
+    })
+
+    it('fail to charge', async () => {
+      const originPoint = await service.getOne(userId)
+      try {
+        // 음수 값을 충전한다.
+        await service.charge(userId, amount3)
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException)
+      }
+
+      // 충전되지 않았음을 확인하기 위해 재조회한다.
+      const newPoint = await service.getOne(userId)
+      expect(newPoint.point).toEqual(originPoint.point)
     })
   })
 
