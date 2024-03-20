@@ -66,10 +66,11 @@ describe('PointService', () => {
     });
     // 포인트 충전 테스트
     it('Charge Point Check', async () => {
-      const firstCharge = await service.charge(1, 1000);
-      expect(firstCharge.point).toEqual(1000);
-      const secondCharge = await service.charge(1, 500);
-      expect(secondCharge.point).toEqual(1500);
+      await service.charge(1, 1000);     
+      const chargePoint = await service.point(1);
+      expect(chargePoint.point).toBe(1000);
+      const chargeHistory = await service.history(1);
+      expect(chargeHistory.length).toBe(1);
     });
   });
 
@@ -88,8 +89,11 @@ describe('PointService', () => {
     });
     // 포인트 사용 테스트
     it('Use Point Check', async () => {
-      const usePoint = await service.use(1, 1000);
-      expect(usePoint.point).toEqual(4000);
+      await service.use(1, 1000);
+      const usePoint = await service.point(1);
+      expect(usePoint.point).toBe(4000);
+      const useHistory = await service.history(1);
+      expect(useHistory.length).toBe(2);
     });
     // 보유 포인트보다 많이 사용한 상황 테스트
     it('Use More Point Check', async () => {
