@@ -22,15 +22,16 @@ describe('PointService', () => {
   describe('get', () => {
     const userId = 1
     const amount = 0
+    beforeEach(async () => {
+      await service.charge(userId, amount)
+    })
 
     it('succeed to get', async () => {
-      await service.charge(userId, amount)
       const result = await service.getOne(userId).then(_ => _.point)
       expect(amount).toEqual(result)
     })
 
     it('fail to get', async () => {
-      await service.charge(userId, amount)
       try {
         await service.getOne(2).then(_ => _.point)
       } catch (e) {
@@ -63,10 +64,11 @@ describe('PointService', () => {
     const userId = 1
     const amount1 = 0
     const amount2 = 100
+    beforeEach(async () => {
+      await service.charge(userId, amount1)
+    })
 
     it('succeed to charge', async () => {
-      const p1 = await service.charge(userId, amount1)
-      expect(p1.point).toBe(amount1)
       const p2 = await service.charge(userId, amount2)
       expect(p2.point).toBe(amount2)
     })
@@ -77,15 +79,16 @@ describe('PointService', () => {
     const amount1 = 100
     const useAmount1 = 70
     const useAmount2 = 110
+    beforeEach(async () => {
+      await service.charge(userId, amount1)
+    })
 
     it('succeed to use', async () => {
-      await service.charge(userId, amount1)
       const p1 = await service.use(userId, useAmount1)
       expect(p1.point).toBe(amount1 - useAmount1)
     })
 
     it('fail to use', async () => {
-      await service.charge(userId, amount1)
       const p2 = await service.use(userId, useAmount2)
       expect(p2.point).toBe(amount1)
     })
