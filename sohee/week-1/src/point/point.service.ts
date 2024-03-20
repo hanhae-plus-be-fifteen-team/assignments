@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { PointHistory, TransactionType, UserPoint } from './point.model'
 import { UserPointTable } from '../database/userpoint.table'
 import { PointHistoryTable } from '../database/pointhistory.table'
@@ -23,10 +23,12 @@ export class PointService {
   }
 
   async charge(id: number, amount: number): Promise<UserPoint> {
-    const prevAmount = (await this.getOne(id)).point
+    const prev = await this.getOne(id)
+    if (amount < 0) throw new BadRequestException()
+
     const updatedUserPoint = await this.userDb.insertOrUpdate(
       id,
-      prevAmount + amount,
+      prev.point + amount,
     )
     await this.historyDb.insert(
       id,
