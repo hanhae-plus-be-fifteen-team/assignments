@@ -11,7 +11,11 @@ export class PointService {
   ) {}
 
   getOne(id: number): Promise<UserPoint> {
-    return this.userDb.selectById(id)
+    try {
+      return this.userDb.selectById(id)
+    } catch (e) {
+      throw new Error(e)
+    }
   }
 
   getHistory(id: number): Promise<PointHistory[]> {
