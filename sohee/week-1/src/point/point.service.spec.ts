@@ -95,8 +95,10 @@ describe('PointService', () => {
   describe('use', () => {
     const userId = 1
     const amount1 = 100
+    const useAmount0 = -50
     const useAmount1 = 70
     const useAmount2 = 110
+
     beforeEach(async () => {
       await service.charge(userId, amount1)
     })
@@ -106,7 +108,18 @@ describe('PointService', () => {
       expect(p1.point).toBe(amount1 - useAmount1)
     })
 
-    it('fail to use', async () => {
+    it('fail to use - invalid request', async () => {
+      const origin = await service.getOne(userId)
+      try {
+        await service.use(userId, useAmount0)
+      } catch (e) {
+        expect(e).toBeInstanceOf(BadRequestException)
+      }
+      const updated = await service.getOne(userId)
+      expect(updated.point).toEqual((await origin).point)
+    })
+
+    it('fail to use - lack of points', async () => {
       const p2 = await service.use(userId, useAmount2)
       expect(p2.point).toBe(amount1)
     })
