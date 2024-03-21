@@ -5,7 +5,7 @@ import { PointHistoryTable } from '../database/pointhistory.table'
 
 @Injectable()
 export class PointService {
-  private writeLock: boolean = false
+  private writeLockTable: Record<number, boolean> = {}
 
   constructor(
     private readonly userPointTable: UserPointTable,
@@ -24,8 +24,8 @@ export class PointService {
     }
 
     // critical section
-    await this.waitWriteLock()
-    this.writeLock = true
+    await this.waitWriteLock(userId)
+    this.writeLockTable[userId] = true
 
     const userPointBeforeUpsert = await this.userPointTable.selectById(userId)
 
@@ -34,7 +34,7 @@ export class PointService {
       userPointBeforeUpsert.point + amount,
     )
 
-    this.writeLock = false
+    this.writeLockTable[userId] = false
     // critical section end
 
     await this.pointHistoryTable.insert(
@@ -55,15 +55,15 @@ export class PointService {
    */
   async use(userId: number, amount: number): Promise<UserPoint> {
     // critical section
-    await this.waitWriteLock()
-    this.writeLock = true
+    await this.waitWriteLock(userId)
+    this.writeLockTable[userId] = true
 
     const userPointBeforeUpsert = await this.userPointTable.selectById(userId)
 
     const pointToUpsert = userPointBeforeUpsert.point - amount
 
     if (pointToUpsert < 0) {
-      this.writeLock = false
+      this.writeLockTable[userId] = false
       throw new Error('Limit Exceeded')
     }
 
@@ -72,7 +72,7 @@ export class PointService {
       pointToUpsert,
     )
 
-    this.writeLock = false
+    this.writeLockTable[userId] = false
     // critical section end
 
     await this.pointHistoryTable.insert(
@@ -106,12 +106,13 @@ export class PointService {
   /**
    *
    * busy waiting
+   * @param userId user's ID
    * @param interval checking interval (default 10ms)
    */
-  private waitWriteLock(interval?: number) {
+  private waitWriteLock(userId: number, interval?: number) {
     return new Promise(resolve => {
       const checkLock = () => {
-        if (this.writeLock) {
+        if (this.writeLockTable[userId]) {
           setTimeout(checkLock, interval ?? 10)
         } else {
           resolve(true)
