@@ -24,20 +24,12 @@ export class PointService {
         amount: number,
     ): Promise<UserPoint> {
         let beforeUpdate: UserPoint;
-        try{
-            if (amount < 0) throw new Error('amount should larger then 0');
-            beforeUpdate = await this.userDb.selectById(userId);
-            const calcPoint = beforeUpdate.point + amount;
-            const afterUpdate = await this.userDb.insertOrUpdate(userId, calcPoint);
-            await this.historyDb.insert(userId, amount, TransactionType.CHARGE, afterUpdate.updateMillis);
-            return afterUpdate;
-        } catch(e) {
-            if (beforeUpdate) {
-                // 에러가 발생하면 업데이트 이전의 데이터를 복원 (테스트 방법이 없음)
-                await this.userDb.insertOrUpdate(userId, beforeUpdate.point);
-            }
-            throw e;
-        }
+        if (amount < 0) throw new Error('amount should be larger than 0');
+        beforeUpdate = await this.userDb.selectById(userId);
+        const calcPoint = beforeUpdate.point + amount;
+        const afterUpdate = await this.userDb.insertOrUpdate(userId, calcPoint);
+        await this.insertHistory(userId, amount, TransactionType.CHARGE, afterUpdate.updateMillis);
+        return afterUpdate;
     }
 
     async use(
@@ -45,21 +37,24 @@ export class PointService {
         amount: number,
     ): Promise<UserPoint> {
         let beforeUpdate: UserPoint;
-        try {
-            if (amount < 0) throw new Error('amount should larger then 0')
-            beforeUpdate = await this.userDb.selectById(userId);
-            const calcPoint = beforeUpdate.point - amount
-            if (calcPoint < 0) throw new Error('Balance Insufficient')
-            const afterUpdate = await this.userDb.insertOrUpdate(userId, calcPoint);
-            await this.historyDb.insert(userId, amount, TransactionType.USE, afterUpdate.updateMillis);
-            return afterUpdate;
-        } catch(e) {
-            if (beforeUpdate) {
-                // 에러가 발생하면 업데이트 이전의 데이터를 복원
-                await this.userDb.insertOrUpdate(userId, beforeUpdate.point);
-            }
-            throw e;
-        }
+        if (amount < 0) throw new Error('amount should be larger than 0');
+        beforeUpdate = await this.userDb.selectById(userId);
+        const calcPoint = beforeUpdate.point - amount;
+        if (calcPoint < 0) throw new Error('Balance Insufficient');
+        const afterUpdate = await this.userDb.insertOrUpdate(userId, calcPoint);
+        await this.insertHistory(userId, amount, TransactionType.USE, afterUpdate.updateMillis);
+        return afterUpdate;
+    }
+
+    // charge, use에서 history insert를 비동기로 실행하기 위함(실패 했을 때 반복 요청하는 코드 추가해야함)
+    private async insertHistory(
+        userId: number,
+        amount: number,
+        transactionType: TransactionType,
+        updateMillis: number,
+    ): Promise<void> {
+        // 비동기적으로 실행할 작업을 추가
+        await this.historyDb.insert(userId, amount, transactionType, updateMillis);
     }
     
 }
