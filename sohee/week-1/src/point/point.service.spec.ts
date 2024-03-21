@@ -1,16 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { PointService } from './point.service'
-import { UserPointTable } from '../database/userpoint.table'
-import { PointHistoryTable } from '../database/pointhistory.table'
 import { TransactionType } from './point.model'
 import { BadRequestException } from '@nestjs/common/exceptions'
+import { PointController } from './point.controller'
+import { DatabaseModule } from '../database/database.module'
 
 describe('PointService', () => {
   let service: PointService
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [PointService, UserPointTable, PointHistoryTable],
+      imports: [DatabaseModule],
+      controllers: [PointController],
+      providers: [PointService],
     }).compile()
 
     service = module.get<PointService>(PointService)
