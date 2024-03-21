@@ -40,6 +40,11 @@ describe('PointService', () => {
         expect(pointAfterCharge.point).toBe(accumulates[parseInt(i) + 1])
       }
     })
+    it('Fail to charge if the point value is negative', async () => {
+      const userId = 1
+      const amount = -1 * Math.floor(1000 * Math.random())
+      await expect(pointService.charge(userId, amount)).rejects.toThrow(Error)
+    })
   })
 
   describe('PointService.use()', () => {
