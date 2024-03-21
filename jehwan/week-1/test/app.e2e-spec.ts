@@ -52,6 +52,14 @@ describe('AppController (e2e)', () => {
       requests.sort((a, b) => a.body.point - b.body.point)
       expect(requests.map(r => r.body.point).at(-1)).toBe(100000)
     })
+    it('Charge the negative point', async () => {
+      await request(app.getHttpServer())
+        .patch('/point/1/charge')
+        .send({
+          amount: -1000,
+        })
+        .expect(400)
+    })
   })
   describe('PATCH /point/{id}/use', () => {
     beforeEach(async () => {
