@@ -33,7 +33,7 @@ export class PointService {
             return afterUpdate;
         } catch(e) {
             if (beforeUpdate) {
-                // 에러가 발생하면 업데이트 이전의 데이터를 복원
+                // 에러가 발생하면 업데이트 이전의 데이터를 복원 (테스트 방법이 없음)
                 await this.userDb.insertOrUpdate(userId, beforeUpdate.point);
             }
             throw e;
