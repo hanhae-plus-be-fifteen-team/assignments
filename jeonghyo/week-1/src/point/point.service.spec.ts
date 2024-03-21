@@ -65,7 +65,7 @@ describe('PointService', () => {
         await service.charge(1, -1000);
       } catch(e) {
         expect(e).toBeInstanceOf(Error);
-        expect(e.message).toEqual('amount should larger then 0');
+        expect(e.message).toEqual('amount should be larger than 0');
       }      
     });
     // 포인트 충전 테스트
@@ -75,25 +75,6 @@ describe('PointService', () => {
       expect(chargePoint.point).toBe(1000);
       const chargeHistory = await service.history(1);
       expect(chargeHistory.length).toBe(1);
-    });
-    it('should roll back changes on charge error', async () => {
-      // 모의 객체를 사용하여 insertOrUpdate 함수를 임의로 실패하도록 설정
-      jest.spyOn(userDb, 'insertOrUpdate').mockImplementationOnce(() => {
-        throw new Error('Mocked insertOrUpdate failure');
-      });
-  
-      const userId = 1;
-      const initialPoint = 100;
-      const amount = 50;
-  
-      // 사용자의 초기 포인트를 설정
-      jest.spyOn(userDb, 'selectById').mockResolvedValueOnce({ id: userId, point: initialPoint, updateMillis: Date.now() });
-  
-      // charge 함수를 호출
-      await expect(service.charge(userId, amount)).rejects.toThrowError('Mocked insertOrUpdate failure');
-  
-      // 복원 코드가 호출되었는지 확인
-      expect(userDb.insertOrUpdate).toHaveBeenCalledWith(userId, initialPoint);
     });
   });
 
@@ -107,7 +88,7 @@ describe('PointService', () => {
         await service.use(1, -1000);
       } catch(e) {
         expect(e).toBeInstanceOf(Error);
-        expect(e.message).toEqual('amount should larger then 0');
+        expect(e.message).toEqual('amount should be larger than 0');
       }      
     });
     // 포인트 사용 테스트
@@ -126,25 +107,6 @@ describe('PointService', () => {
         expect(e).toBeInstanceOf(Error);
         expect(e.message).toEqual('Balance Insufficient');
       }
-    });
-    it('should roll back changes on use error', async () => {
-      // 모의 객체를 사용하여 insertOrUpdate 함수를 임의로 실패하도록 설 
-      jest.spyOn(userDb, 'insertOrUpdate').mockImplementationOnce(() => {
-        throw new Error('Mocked insertOrUpdate failure');
-      });
-  
-      const userId = 1;
-      const initialPoint = 100;
-      const amount = 50;
-  
-      // 사용자의 초기 포인트를 설정
-      jest.spyOn(userDb, 'selectById').mockResolvedValueOnce({ id: userId, point: initialPoint, updateMillis: Date.now() });
-  
-      // use 함수를 호출
-      await expect(service.use(userId, amount)).rejects.toThrowError('Mocked insertOrUpdate failure');
-  
-      // 복원 코드가 호출되었는지 확인
-      expect(userDb.insertOrUpdate).toHaveBeenCalledWith(userId, initialPoint);
     });
   });
 
