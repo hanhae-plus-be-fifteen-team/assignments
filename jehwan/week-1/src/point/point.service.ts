@@ -19,6 +19,10 @@ export class PointService {
    * @returns balance after charge
    */
   async charge(userId: number, amount: number): Promise<UserPoint> {
+    if (amount < 0) {
+      throw Error('The amount must be greater than and equal to 0')
+    }
+
     // critical section
     await this.waitWriteLock()
     this.writeLock = true
