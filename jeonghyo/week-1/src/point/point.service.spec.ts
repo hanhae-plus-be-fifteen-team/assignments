@@ -106,4 +106,24 @@ describe('PointService', () => {
       expect(mockInsert).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('Concurrency Control', () => {
+    it('charge and use points simultaneously', async () => {
+      const userId = 1;
+      const chargeAmount = 50;
+      const useAmount = 20;
+
+      await service.charge(userId, 100);
+
+      // promise.all을 사용하여 charge와 use 함수 실행
+      // charge함수가 끝나기 전에 use 함수에서 selectById함수를 호출하기 때문에 결과 오류 발생 -> 락을 걸어 같은 아이디 일때 순차실행되도록 조절
+      const [first, second] = await Promise.all([        
+        service.charge(userId, chargeAmount),
+        service.use(userId, useAmount),
+      ]);
+
+      expect(first.point).toBe(150);
+      expect(second.point).toBe(130);
+    });
+  });
 });
