@@ -54,8 +54,7 @@ describe('AppController (e2e)', () => {
 
       // If sorted by amount, the largest result should be 100000.
       // The order of calling is not important.
-      fulfilled.sort((a, b) => a.value.body.point - b.value.body.point)
-      expect(fulfilled.map(r => r.value.body.point).at(-1)).toBe(100000)
+      expect(getMaxPoint(fulfilled)).toBe(100000)
     })
     it('Charge the negative point', async () => {
       await request(app.getHttpServer())
@@ -110,8 +109,7 @@ describe('AppController (e2e)', () => {
 
       // If sorted by amount, the smallest result should be 8500.
       // The order of calling is not important.
-      fulfilled.sort((a, b) => a.value.body.point - b.value.body.point)
-      expect(fulfilled.map(r => r.value.body.point).at(0)).toBe(8500)
+      expect(getMinPoint(fulfilled)).toBe(8500)
     })
     it('Return BadRequest when if the balance is insufficient', async () => {
       request(app.getHttpServer())
@@ -190,4 +188,12 @@ function asAllFulfilled(
   requests: PromiseSettledResult<supertest.Response>[],
 ): PromiseFulfilledResult<supertest.Response>[] {
   return requests as PromiseFulfilledResult<supertest.Response>[]
+}
+
+function getMaxPoint(fulfilled: PromiseFulfilledResult<supertest.Response>[]) {
+  return Math.max(...fulfilled.map(r => r.value.body.point))
+}
+
+function getMinPoint(fulfilled: PromiseFulfilledResult<supertest.Response>[]) {
+  return Math.min(...fulfilled.map(r => r.value.body.point))
 }
