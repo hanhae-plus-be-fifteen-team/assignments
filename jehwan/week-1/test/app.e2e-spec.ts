@@ -111,6 +111,14 @@ describe('AppController (e2e)', () => {
       // The order of calling is not important.
       expect(getMinPoint(fulfilled)).toBe(8500)
     })
+    it('Use the negative point', async () => {
+      await request(app.getHttpServer())
+        .patch('/point/1/charge')
+        .send({
+          amount: -1000,
+        })
+        .expect(400)
+    })
     it('Return BadRequest when if the balance is insufficient', async () => {
       request(app.getHttpServer())
         .patch('/point/1/use')
