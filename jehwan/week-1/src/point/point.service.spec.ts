@@ -3,13 +3,24 @@ import { PointService } from './point.service'
 import { UserPointTable } from '../database/userpoint.table'
 import { TransactionType } from './point.model'
 import { PointHistoryTable } from '../database/pointhistory.table'
+import { PointHistoryRepository, UserPointRepository } from './point.repository'
 
 describe('PointService', () => {
   let pointService: PointService
 
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
-      providers: [PointService, UserPointTable, PointHistoryTable],
+      providers: [
+        PointService,
+        {
+          provide: PointHistoryRepository,
+          useClass: PointHistoryTable,
+        },
+        {
+          provide: UserPointRepository,
+          useClass: UserPointTable,
+        },
+      ],
     }).compile()
 
     pointService = app.get<PointService>(PointService)

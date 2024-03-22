@@ -1,15 +1,14 @@
 import { Injectable } from '@nestjs/common'
 import { PointHistory, TransactionType, UserPoint } from './point.model'
-import { UserPointTable } from '../database/userpoint.table'
-import { PointHistoryTable } from '../database/pointhistory.table'
+import { PointHistoryRepository, UserPointRepository } from './point.repository'
 
 @Injectable()
 export class PointService {
   private writeLockTable: Record<number, boolean> = {}
 
   constructor(
-    private readonly userPointTable: UserPointTable,
-    private readonly pointHistoryTable: PointHistoryTable,
+    private readonly userPointRepository: UserPointRepository,
+    private readonly pointHistoryRepository: PointHistoryRepository,
   ) {}
 
   /**
@@ -27,9 +26,10 @@ export class PointService {
     await this.waitWriteLock(userId)
     this.writeLockTable[userId] = true
 
-    const userPointBeforeUpsert = await this.userPointTable.selectById(userId)
+    const userPointBeforeUpsert =
+      await this.userPointRepository.selectById(userId)
 
-    const userPointAfterUpsert = await this.userPointTable.insertOrUpdate(
+    const userPointAfterUpsert = await this.userPointRepository.insertOrUpdate(
       userId,
       userPointBeforeUpsert.point + amount,
     )
@@ -37,7 +37,7 @@ export class PointService {
     this.writeLockTable[userId] = false
     // critical section end
 
-    await this.pointHistoryTable.insert(
+    await this.pointHistoryRepository.insert(
       userId,
       amount,
       TransactionType.CHARGE,
@@ -58,7 +58,8 @@ export class PointService {
     await this.waitWriteLock(userId)
     this.writeLockTable[userId] = true
 
-    const userPointBeforeUpsert = await this.userPointTable.selectById(userId)
+    const userPointBeforeUpsert =
+      await this.userPointRepository.selectById(userId)
 
     const pointToUpsert = userPointBeforeUpsert.point - amount
 
@@ -67,7 +68,7 @@ export class PointService {
       throw new Error('Limit Exceeded')
     }
 
-    const userPointAfterUpsert = await this.userPointTable.insertOrUpdate(
+    const userPointAfterUpsert = await this.userPointRepository.insertOrUpdate(
       userId,
       pointToUpsert,
     )
@@ -75,7 +76,7 @@ export class PointService {
     this.writeLockTable[userId] = false
     // critical section end
 
-    await this.pointHistoryTable.insert(
+    await this.pointHistoryRepository.insert(
       userId,
       amount,
       TransactionType.USE,
@@ -91,7 +92,7 @@ export class PointService {
    * @returns user's point
    */
   async readPoint(userId: number): Promise<UserPoint> {
-    return this.userPointTable.selectById(userId)
+    return this.userPointRepository.selectById(userId)
   }
 
   /**
@@ -100,7 +101,7 @@ export class PointService {
    * @returns user's histories
    */
   async readHistories(userId: number): Promise<PointHistory[]> {
-    return this.pointHistoryTable.selectAllByUserId(userId)
+    return this.pointHistoryRepository.selectAllByUserId(userId)
   }
 
   /**
