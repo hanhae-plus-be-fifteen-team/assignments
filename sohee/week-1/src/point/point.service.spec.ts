@@ -50,6 +50,10 @@ describe('PointService', () => {
         updateMillis: Date.now(),
       })
 
+      jest.spyOn(mockUserDb, 'insertOrUpdate').mockResolvedValue({
+        id: userId,
+        amount: amount,
+      })
       await service.charge(userId, amount)
     })
 
