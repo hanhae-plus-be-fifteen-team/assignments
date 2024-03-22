@@ -28,7 +28,8 @@ export class PointService {
         beforeUpdate = await this.userDb.selectById(userId);
         const calcPoint = beforeUpdate.point + amount;
         const afterUpdate = await this.userDb.insertOrUpdate(userId, calcPoint);
-        await this.insertHistory(userId, amount, TransactionType.CHARGE, afterUpdate.updateMillis);
+        // insertHistory의 결과를 기다리지 않고 넘어감
+        this.insertHistory(userId, amount, TransactionType.CHARGE, afterUpdate.updateMillis);
         return afterUpdate;
     }
 
@@ -42,19 +43,28 @@ export class PointService {
         const calcPoint = beforeUpdate.point - amount;
         if (calcPoint < 0) throw new Error('Balance Insufficient');
         const afterUpdate = await this.userDb.insertOrUpdate(userId, calcPoint);
-        await this.insertHistory(userId, amount, TransactionType.USE, afterUpdate.updateMillis);
+        // insertHistory의 결과를 기다리지 않고 넘어감
+        this.insertHistory(userId, amount, TransactionType.USE, afterUpdate.updateMillis);
         return afterUpdate;
     }
 
-    // charge, use에서 history insert를 비동기로 실행하기 위함(실패 했을 때 반복 요청하는 코드 추가해야함)
-    private async insertHistory(
+    // history insert를 비동기로 실행
+    async insertHistory(
         userId: number,
         amount: number,
         transactionType: TransactionType,
-        updateMillis: number,
+        updateMillis: number
     ): Promise<void> {
-        // 비동기적으로 실행할 작업을 추가
-        await this.historyDb.insert(userId, amount, transactionType, updateMillis);
+        let retries = 3; // 최대 재시도 횟수
+        while (retries > 0) {
+            try {
+                await this.historyDb.insert(userId, amount, transactionType, updateMillis);
+                return; // 성공적으로 삽입되면 함수 종료
+            } catch (error) {
+                console.warn('Inserting history failed. Retrying...');
+                retries--;
+            }
+        }
+        throw new Error('Failed to insert history after maximum retries.');
     }
-    
 }
