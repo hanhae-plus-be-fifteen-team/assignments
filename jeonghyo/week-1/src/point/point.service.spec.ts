@@ -35,29 +35,6 @@ describe('PointService', () => {
     });
   });
 
-  describe('PointService.history()', () => {
-    beforeEach(async () => {
-      await service.charge(1, 10000);
-      await service.charge(2, 10000);
-      await service.use(1, 1000);
-      await service.use(2, 1000);
-    })
-    it('Point History Check', async () => {    
-      // 내역 검색 테스트
-      const userHistory_1 = await service.history(1);
-      expect(userHistory_1).toBeInstanceOf(Array);
-      expect(userHistory_1.length).toEqual(2);
-      expect(userHistory_1[0]).toMatchObject({
-        userId: 1,
-        type: TransactionType.CHARGE
-      });
-      expect(userHistory_1[1]).toMatchObject({
-        userId: 1,
-        type: TransactionType.USE
-      });
-    });
-  });
-
   describe('PointService.charge()', () => {
     // 음수 입력 상황 테스트
     it('Charge Amount Check', async () => {
@@ -72,9 +49,7 @@ describe('PointService', () => {
     it('Charge Point Check', async () => {
       await service.charge(1, 1000);     
       const chargePoint = await service.point(1);
-      expect(chargePoint.point).toBe(1000);
-      const chargeHistory = await service.history(1);
-      expect(chargeHistory.length).toBe(1);
+      expect(chargePoint.point).toBe(1000);      
     });
   });
 
@@ -95,9 +70,7 @@ describe('PointService', () => {
     it('Use Point Check', async () => {
       await service.use(1, 1000);
       const usePoint = await service.point(1);
-      expect(usePoint.point).toBe(4000);
-      const useHistory = await service.history(1);
-      expect(useHistory.length).toBe(2);
+      expect(usePoint.point).toBe(4000);    
     });
     // 보유 포인트보다 많이 사용한 상황 테스트
     it('Use More Point Check', async () => {
@@ -110,40 +83,27 @@ describe('PointService', () => {
     });
   });
 
-  describe('Sequential Execution Test', () => {
-    beforeEach(async () => {
-      await service.charge(1, 10000);
-      await service.charge(1, 1000);
-      await service.use(1, 2000);
-      await service.use(1, 3000);
-      await service.charge(1, 4000);
-    });
-    it('Sequential Execution Check', async () => {
-      const userHistory = await service.history(1);
-      // 요청한 포인트 사용 내역이 모두 입력되었는지 확인
-      expect(userHistory.length).toEqual(5);
+  describe('insertHistory', () => {
+    const userId = 1;
+      const amount = 10;
+      const transactionType = TransactionType.CHARGE;
+      const updateMillis = Date.now();
 
-      // 요청한 순서대로 내역이 입력되었는지 확인
-      expect(userHistory[0]).toMatchObject({
-        type: TransactionType.CHARGE,
-        amount: 10000
-      });
-      expect(userHistory[1]).toMatchObject({
-        type: TransactionType.CHARGE,
-        amount: 1000
-      });
-      expect(userHistory[2]).toMatchObject({
-        type: TransactionType.USE,
-        amount: 2000
-      });
-      expect(userHistory[3]).toMatchObject({
-        type: TransactionType.USE,
-        amount: 3000
-      });
-      expect(userHistory[4]).toMatchObject({
-        type: TransactionType.CHARGE,
-        amount: 4000
-      });
+    it('Inserting history check', async () => {
+      // 성공 케이스
+      await service.insertHistory(userId, amount, transactionType, updateMillis);
+      const chargeHistory = await service.history(1);
+      expect(chargeHistory.length).toBe(1);
+    })
+
+    it('Inserting history retry check', async () => {
+      // 한번 실패 케이스
+      const mockInsert = jest.fn();
+      mockInsert.mockRejectedValueOnce(new Error('Simulated error'));               
+      historyDb.insert = mockInsert;
+  
+      await service.insertHistory(userId, amount, transactionType, updateMillis);
+      expect(mockInsert).toHaveBeenCalledTimes(2);
     });
   });
 });
