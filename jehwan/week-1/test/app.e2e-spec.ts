@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 import { AppModule } from '../src/app.module'
 import { TransactionType } from '../src/point/point.model'
+import supertest from 'supertest'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
@@ -39,7 +40,7 @@ describe('AppController (e2e)', () => {
         })
     })
     it('Charge user points concurrently for the given {id}.', async () => {
-      const requests = await Promise.all(
+      const responses = await Promise.allSettled(
         Array.from({ length: 10 }, (_, i) => {
           return request(app.getHttpServer()).patch('/point/1/charge').send({
             amount: 10000,
@@ -47,10 +48,14 @@ describe('AppController (e2e)', () => {
         }),
       )
 
+      // to assert fulfilled promise
+      expect(isAllFulfilled(responses)).toBeTruthy()
+      const fulfilled = asAllFulfilled(responses)
+
       // If sorted by amount, the largest result should be 100000.
       // The order of calling is not important.
-      requests.sort((a, b) => a.body.point - b.body.point)
-      expect(requests.map(r => r.body.point).at(-1)).toBe(100000)
+      fulfilled.sort((a, b) => a.value.body.point - b.value.body.point)
+      expect(fulfilled.map(r => r.value.body.point).at(-1)).toBe(100000)
     })
     it('Charge the negative point', async () => {
       await request(app.getHttpServer())
@@ -91,7 +96,7 @@ describe('AppController (e2e)', () => {
         })
     })
     it('Use user points concurrently for the given {id}.', async () => {
-      const requests = await Promise.all(
+      const responses = await Promise.allSettled(
         Array.from({ length: 3 }, (_, i) => {
           return request(app.getHttpServer()).patch('/point/1/use').send({
             amount: 500,
@@ -99,10 +104,14 @@ describe('AppController (e2e)', () => {
         }),
       )
 
+      // to assert fulfilled promise
+      expect(isAllFulfilled(responses)).toBeTruthy()
+      const fulfilled = asAllFulfilled(responses)
+
       // If sorted by amount, the smallest result should be 8500.
       // The order of calling is not important.
-      requests.sort((a, b) => a.body.point - b.body.point)
-      expect(requests.map(r => r.body.point).at(0)).toBe(8500)
+      fulfilled.sort((a, b) => a.value.body.point - b.value.body.point)
+      expect(fulfilled.map(r => r.value.body.point).at(0)).toBe(8500)
     })
     it('Return BadRequest when if the balance is insufficient', async () => {
       request(app.getHttpServer())
@@ -170,3 +179,15 @@ describe('AppController (e2e)', () => {
     })
   })
 })
+
+function isAllFulfilled(
+  requests: PromiseSettledResult<supertest.Response>[],
+): requests is PromiseFulfilledResult<supertest.Response>[] {
+  return !requests.some(r => r.status === 'rejected')
+}
+
+function asAllFulfilled(
+  requests: PromiseSettledResult<supertest.Response>[],
+): PromiseFulfilledResult<supertest.Response>[] {
+  return requests as PromiseFulfilledResult<supertest.Response>[]
+}
