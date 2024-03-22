@@ -10,26 +10,26 @@ export class PointService {
     private readonly historyDb: PointHistoryTable,
   ) {}
 
-  getOne(id: number): Promise<UserPoint> {
+  async getOne(id: number): Promise<UserPoint> {
     try {
-      return this.userDb.selectById(id)
+      return await this.userDb.selectById(id)
     } catch (e) {
       throw new Error(e)
     }
   }
 
-  getHistory(id: number): Promise<PointHistory[]> {
-    return this.historyDb.selectAllByUserId(id)
+  async getHistory(id: number): Promise<PointHistory[]> {
+    return await this.historyDb.selectAllByUserId(id)
   }
 
   async charge(id: number, amount: number): Promise<UserPoint> {
-    const prev = await this.getOne(id)
     if (amount < 0) throw new BadRequestException()
-
+    const prev = await this.getOne(id)
     const updatedUserPoint = await this.userDb.insertOrUpdate(
       id,
       prev.point + amount,
     )
+
     await this.historyDb.insert(
       id,
       amount,
