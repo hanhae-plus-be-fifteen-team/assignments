@@ -1,18 +1,36 @@
 import { Test, TestingModule } from '@nestjs/testing'
 import { PointService } from './point.service'
-import { TransactionType } from './point.model'
+import { TransactionType, UserPoint } from './point.model'
 import { BadRequestException } from '@nestjs/common/exceptions'
-import { PointController } from './point.controller'
-import { DatabaseModule } from '../database/database.module'
+import { UserPointTable } from '../database/userpoint.table'
+import { PointHistoryTable } from '../database/pointhistory.table'
 
 describe('PointService', () => {
   let service: PointService
+  let mockUserDb: { selectById: jest.Mock; insertOrUpdate: jest.Mock }
+  let mockHistoryDb: { insert: jest.Mock; selectAllByUserId: jest.Mock }
 
   beforeEach(async () => {
+    mockUserDb = {
+      selectById: jest.fn(),
+      insertOrUpdate: jest.fn(),
+    }
+    mockHistoryDb = {
+      insert: jest.fn(),
+      selectAllByUserId: jest.fn(),
+    }
     const module: TestingModule = await Test.createTestingModule({
-      imports: [DatabaseModule],
-      controllers: [PointController],
-      providers: [PointService],
+      providers: [
+        PointService,
+        {
+          provide: UserPointTable,
+          useValue: mockUserDb,
+        },
+        {
+          provide: PointHistoryTable,
+          useValue: mockHistoryDb,
+        },
+      ],
     }).compile()
 
     service = module.get<PointService>(PointService)
@@ -26,12 +44,22 @@ describe('PointService', () => {
     const userId = 1
     const amount = 0
     beforeEach(async () => {
+      jest.spyOn(service, 'getOne').mockResolvedValue({
+        id: userId,
+        point: amount,
+        updateMillis: Date.now(),
+      })
+
       await service.charge(userId, amount)
     })
 
+    afterEach(async () => {
+      jest.resetModules()
+    })
+
     it('succeed to get', async () => {
-      const result = await service.getOne(userId).then(_ => _.point)
-      expect(amount).toEqual(result)
+      const result = await service.getOne(userId)
+      expect(amount).toEqual(result.point)
     })
 
     it('fail to get', async () => {
@@ -48,8 +76,18 @@ describe('PointService', () => {
     const userId = 1
     const amount1 = 0
     const amount2 = 100
-    const amount3 = 5 // use
+    const amount3 = 5
     const amount4 = 30
+
+    beforeEach(async () => {
+      jest.spyOn(service, 'getOne').mockImplementation(async (id: number) => {
+        return {
+          id: id,
+          point: 0,
+          updateMillis: Date.now(),
+        } as UserPoint
+      })
+    })
 
     it('get all history', async () => {
       await service.charge(userId, amount1)
@@ -71,6 +109,21 @@ describe('PointService', () => {
     const amount2 = 100
     const amount3 = -100
     beforeEach(async () => {
+      jest.spyOn(service, 'getOne').mockResolvedValue({
+        id: userId,
+        point: amount1,
+        updateMillis: Date.now(),
+      })
+
+      mockUserDb.insertOrUpdate.mockResolvedValue(
+        (id: number, amt: number) =>
+          ({
+            id: id,
+            point: amt,
+            updateMillis: Date.now(),
+          }) as UserPoint,
+      )
+
       await service.charge(userId, amount1)
     })
 
