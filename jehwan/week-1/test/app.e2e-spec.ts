@@ -4,11 +4,9 @@ import * as request from 'supertest'
 import { AppModule } from '../src/app.module'
 import { TransactionType } from '../src/point/point.model'
 import supertest from 'supertest'
-import { PointController } from '../src/point/point.controller'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
-  let pointController: PointController
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -17,8 +15,6 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication()
     await app.init()
-
-    pointController = app.get<PointController>(PointController)
   })
 
   describe('PATCH /point/{id}/charge', () => {
@@ -247,38 +243,28 @@ describe('AppController (e2e)', () => {
        */
       switch (firstResponse) {
         case chargeResponse:
-          console.log('case 1')
           expect(finalPointResponse.body.point).toBe(0)
           break
         case useResponse:
-          console.log('case 2')
           expect(finalPointResponse.body.point).toBe(30000)
           break
       }
     })
     it('Charge and Use user points concurrently - outcome depends on which request has the error (Network)', async () => {
       // Mock functions randomly that always throw Error
-      pointController.charge =
-        Math.random() < 0.5
-          ? jest.fn().mockImplementation(() => {
-              throw new Error()
-            })
-          : pointController.charge
-      pointController.use =
-        Math.random() < 0.5
-          ? jest.fn().mockImplementation(() => {
-              throw new Error()
-            })
-          : pointController.use
+      const mockChargeRequest = randomlyFails((id, amount) =>
+        request(app.getHttpServer())
+          .patch(`/point/${id}/charge`)
+          .send({ amount }),
+      )
+      const mockUseRequest = randomlyFails((id, amount) =>
+        request(app.getHttpServer()).patch(`/point/${id}/use`).send({ amount }),
+      )
 
       // Send charge and use requests concurrently
       const requests = [
-        request(app.getHttpServer())
-          .patch('/point/1/use')
-          .send({ amount: 10000 }),
-        request(app.getHttpServer())
-          .patch('/point/1/charge')
-          .send({ amount: 10000 }),
+        mockUseRequest('1', 10000),
+        mockChargeRequest('1', 10000),
       ]
 
       const [useResponse, chargeResponse] = await Promise.allSettled(requests)
@@ -340,4 +326,13 @@ function getMaxPoint(fulfilled: PromiseFulfilledResult<supertest.Response>[]) {
 
 function getMinPoint(fulfilled: PromiseFulfilledResult<supertest.Response>[]) {
   return Math.min(...fulfilled.map(r => r.value.body.point))
+}
+
+function randomlyFails(fn: (...args: unknown[]) => supertest.Test) {
+  return (...args: unknown[]) => {
+    if (Math.random() < 0.5) {
+      return Promise.reject(new Error())
+    }
+    return fn(...args)
+  }
 }
