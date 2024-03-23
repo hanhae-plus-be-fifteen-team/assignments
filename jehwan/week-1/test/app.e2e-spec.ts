@@ -214,6 +214,44 @@ describe('AppController (e2e)', () => {
       const balanceResponse = await request(app.getHttpServer()).get('/point/1')
       expect(balanceResponse.body.point).toBe(20000) // 20000 + 5*1000 - 5*1000
     }, 10000)
+    it('Charge and Use user points concurrently - outcome depends on which request is handled first', async () => {
+      // Send charge and use requests concurrently
+      const requests = [
+        request(app.getHttpServer())
+          .patch('/point/1/charge')
+          .send({ amount: 10000 }),
+        request(app.getHttpServer())
+          .patch('/point/1/use')
+          .send({ amount: 30000 }),
+      ]
+
+      // Handled first request
+      const firstResponse = await Promise.race(requests)
+
+      // Both would have been processed and completed here
+      const chargeResponse = await requests[0]
+      const useResponse = await requests[1]
+
+      // Check remaining points.
+      const finalPointResponse = await request(app.getHttpServer()).get(
+        '/point/1',
+      )
+
+      /**
+       * If the charge request is handled first, the balance will be 0.
+       * If the use request is handled first, the balance will be 30000.
+       */
+      switch (firstResponse) {
+        case chargeResponse:
+          console.log('case 1')
+          expect(finalPointResponse.body.point).toBe(0)
+          break
+        case useResponse:
+          console.log('case 2')
+          expect(finalPointResponse.body.point).toBe(30000)
+          break
+      }
+    })
   })
 })
 
