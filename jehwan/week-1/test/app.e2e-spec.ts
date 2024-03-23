@@ -184,6 +184,37 @@ describe('AppController (e2e)', () => {
         })
     })
   })
+
+  describe('Concurrently PATCH/CHARGE and PATCH/USE', () => {
+    beforeEach(async () => {
+      // Initialize point for user 1 before test
+      await request(app.getHttpServer())
+        .patch('/point/1/charge')
+        .send({ amount: 20000 })
+    })
+
+    it('Charge and Use user points concurrently for the given {id}.', async () => {
+      const responses = await Promise.allSettled([
+        ...Array.from({ length: 5 }, () => {
+          return request(app.getHttpServer())
+            .patch('/point/1/charge')
+            .send({ amount: 1000 })
+        }),
+        ...Array.from({ length: 5 }, () => {
+          return request(app.getHttpServer())
+            .patch('/point/1/use')
+            .send({ amount: 1000 })
+        }),
+      ])
+
+      // To assert fulfilled promise
+      expect(isAllFulfilled(responses)).toBeTruthy()
+
+      // Check the balance.
+      const balanceResponse = await request(app.getHttpServer()).get('/point/1')
+      expect(balanceResponse.body.point).toBe(20000) // 20000 + 5*1000 - 5*1000
+    }, 10000)
+  })
 })
 
 function isAllFulfilled(
