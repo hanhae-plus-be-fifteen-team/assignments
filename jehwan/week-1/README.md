@@ -86,3 +86,132 @@ async charge() {
 ![concurrency-2](assets/concurrency-2.png)
 
 위와 같이 사용하여, 동시에 하나의 작업만 쓰기 작업을 수행할 수 있도록 제한함
+
+## 리팩토링
+
+### Table 단위 Lock -> User 단위 Lock
+
+```ts
+export class PointService {
+  private writeLockTable: Record<number, boolean> = {}
+
+  /**
+   *
+   * busy waiting
+   * @param userId user's ID
+   * @param interval checking interval (default 10ms)
+   */
+  private waitWriteLock(userId: number, interval?: number) {
+    return new Promise(resolve => {
+      const checkLock = () => {
+        if (this.writeLockTable[userId]) {
+          setTimeout(checkLock, interval ?? 10)
+        } else {
+          resolve(true)
+        }
+      }
+      checkLock()
+    })
+  }
+}
+```
+
+Map 자료 구조를 이용하여, 기존 Table 단위 Lock 과 User 단위 Lock 으로 리팩토링 함.
+
+### 동시성 테스트
+
+```ts
+    it('Charge and Use user points concurrently - outcome depends on which request is handled first', async () => {
+  // Send charge and use requests concurrently
+  const requests = [
+    request(app.getHttpServer())
+      .patch('/point/1/charge')
+      .send({ amount: 10000 }),
+    request(app.getHttpServer())
+      .patch('/point/1/use')
+      .send({ amount: 30000 }),
+  ]
+
+  // Handled first request
+  const firstResponse = await Promise.race(requests)
+
+  // Both would have been processed and completed here
+  const chargeResponse = await requests[0]
+  const useResponse = await requests[1]
+
+  // Check remaining points.
+  const finalPointResponse = await request(app.getHttpServer()).get(
+    '/point/1',
+  )
+
+  /**
+   * If the charge request is handled first, the balance will be 0.
+   * If the use request is handled first, the balance will be 30000.
+   */
+  switch (firstResponse) {
+    case chargeResponse:
+      expect(finalPointResponse.body.point).toBe(0)
+      break
+    case useResponse:
+      expect(finalPointResponse.body.point).toBe(30000)
+      break
+  }
+})
+it('Charge and Use user points concurrently - outcome depends on which request has the error (Network)', async () => {
+  // Mock functions randomly that always throw Error
+  const mockChargeRequest = randomlyFails((id, amount) =>
+    request(app.getHttpServer())
+      .patch(`/point/${id}/charge`)
+      .send({ amount }),
+  )
+  const mockUseRequest = randomlyFails((id, amount) =>
+    request(app.getHttpServer()).patch(`/point/${id}/use`).send({ amount }),
+  )
+
+  // Send charge and use requests concurrently
+  const requests = [
+    mockUseRequest('1', 10000),
+    mockChargeRequest('1', 10000),
+  ]
+
+  const [useResponse, chargeResponse] = await Promise.allSettled(requests)
+
+  // Check remaining points.
+  const finalPointResponse = await request(app.getHttpServer()).get(
+    '/point/1',
+  )
+
+  /**
+   * Check outcome depends on which request has the error (Network)
+   */
+  if (
+    useResponse.status === 'rejected' &&
+    chargeResponse.status === 'rejected'
+  ) {
+    expect(finalPointResponse.body.point).toBe(20000)
+  }
+
+  if (
+    useResponse.status === 'rejected' &&
+    chargeResponse.status === 'fulfilled'
+  ) {
+    expect(finalPointResponse.body.point).toBe(30000)
+  }
+
+  if (
+    useResponse.status === 'fulfilled' &&
+    chargeResponse.status === 'rejected'
+  ) {
+    expect(finalPointResponse.body.point).toBe(10000)
+  }
+
+  if (
+    useResponse.status === 'fulfilled' &&
+    chargeResponse.status === 'fulfilled'
+  ) {
+    expect(finalPointResponse.body.point).toBe(20000)
+  }
+})
+```
+
+동시에 요청을 보내고, 요청이 처리 되는 순서에 따라 기대 값을 미리 준비하여 테스트 함.
