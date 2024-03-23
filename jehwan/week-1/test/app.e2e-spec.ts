@@ -4,9 +4,11 @@ import * as request from 'supertest'
 import { AppModule } from '../src/app.module'
 import { TransactionType } from '../src/point/point.model'
 import supertest from 'supertest'
+import { PointController } from '../src/point/point.controller'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
+  let pointController: PointController
 
   beforeEach(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -15,6 +17,8 @@ describe('AppController (e2e)', () => {
 
     app = moduleFixture.createNestApplication()
     await app.init()
+
+    pointController = app.get<PointController>(PointController)
   })
 
   describe('PATCH /point/{id}/charge', () => {
@@ -250,6 +254,69 @@ describe('AppController (e2e)', () => {
           console.log('case 2')
           expect(finalPointResponse.body.point).toBe(30000)
           break
+      }
+    })
+    it('Charge and Use user points concurrently - outcome depends on which request has the error (Network)', async () => {
+      // Mock functions randomly that always throw Error
+      pointController.charge =
+        Math.random() < 0.5
+          ? jest.fn().mockImplementation(() => {
+              throw new Error()
+            })
+          : pointController.charge
+      pointController.use =
+        Math.random() < 0.5
+          ? jest.fn().mockImplementation(() => {
+              throw new Error()
+            })
+          : pointController.use
+
+      // Send charge and use requests concurrently
+      const requests = [
+        request(app.getHttpServer())
+          .patch('/point/1/use')
+          .send({ amount: 10000 }),
+        request(app.getHttpServer())
+          .patch('/point/1/charge')
+          .send({ amount: 10000 }),
+      ]
+
+      const [useResponse, chargeResponse] = await Promise.allSettled(requests)
+
+      // Check remaining points.
+      const finalPointResponse = await request(app.getHttpServer()).get(
+        '/point/1',
+      )
+
+      /**
+       * Check outcome depends on which request has the error (Network)
+       */
+      if (
+        useResponse.status === 'rejected' &&
+        chargeResponse.status === 'rejected'
+      ) {
+        expect(finalPointResponse.body.point).toBe(20000)
+      }
+
+      if (
+        useResponse.status === 'rejected' &&
+        chargeResponse.status === 'fulfilled'
+      ) {
+        expect(finalPointResponse.body.point).toBe(30000)
+      }
+
+      if (
+        useResponse.status === 'fulfilled' &&
+        chargeResponse.status === 'rejected'
+      ) {
+        expect(finalPointResponse.body.point).toBe(10000)
+      }
+
+      if (
+        useResponse.status === 'fulfilled' &&
+        chargeResponse.status === 'fulfilled'
+      ) {
+        expect(finalPointResponse.body.point).toBe(20000)
       }
     })
   })
