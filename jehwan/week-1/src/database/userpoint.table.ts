@@ -22,7 +22,6 @@ export class UserPointTable {
     this.isValidId(id)
     return new Promise(r =>
       setTimeout(() => {
-        console.log(`포인트 : ${amount}`)
         const userPoint = { id: id, point: amount, updateMillis: Date.now() }
         this.table.set(id, userPoint)
         r(userPoint)

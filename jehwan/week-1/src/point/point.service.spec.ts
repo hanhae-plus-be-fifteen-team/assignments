@@ -4,6 +4,7 @@ import { UserPointTable } from '../database/userpoint.table'
 import { TransactionType } from './point.model'
 import { PointHistoryTable } from '../database/pointhistory.table'
 import { PointHistoryRepository, UserPointRepository } from './point.repository'
+import { FootprintTable } from '../database/footprint.table'
 
 describe('PointService', () => {
   let pointService: PointService
@@ -20,6 +21,7 @@ describe('PointService', () => {
           provide: UserPointRepository,
           useClass: UserPointTable,
         },
+        FootprintTable,
       ],
     }).compile()
 

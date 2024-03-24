@@ -6,6 +6,7 @@ import {
   InternalServerErrorException,
   Param,
   Patch,
+  Query,
   ValidationPipe,
 } from '@nestjs/common'
 import { PointHistory, UserPoint } from './point.model'
@@ -15,6 +16,11 @@ import { PointService } from './point.service'
 @Controller('/point')
 export class PointController {
   constructor(private pointService: PointService) {}
+
+  @Get('footprints')
+  async footprints() {
+    return this.pointService.footprints()
+  }
 
   /**
    * TODO - 특정 유저의 포인트를 조회하는 기능을 작성해주세요.
@@ -43,11 +49,12 @@ export class PointController {
   async charge(
     @Param('id') id: string,
     @Body(ValidationPipe) pointDto: PointDto,
+    @Query('label') label?: string,
   ): Promise<UserPoint> {
     const userId = Number.parseInt(id)
     const amount = pointDto.amount
 
-    return this.pointService.charge(userId, amount)
+    return this.pointService.charge(userId, amount, label)
   }
 
   /**
@@ -57,12 +64,13 @@ export class PointController {
   async use(
     @Param('id') id: string,
     @Body(ValidationPipe) pointDto: PointDto,
+    @Query('label') label?: string,
   ): Promise<UserPoint> {
     const userId = Number.parseInt(id)
     const amount = pointDto.amount
 
     try {
-      return await this.pointService.use(userId, amount)
+      return await this.pointService.use(userId, amount, label)
     } catch (e) {
       if (e.message === 'Limit Exceeded') {
         throw new BadRequestException(e.message, { cause: e })

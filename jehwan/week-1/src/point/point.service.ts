@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common'
 import { PointHistory, TransactionType, UserPoint } from './point.model'
 import { PointHistoryRepository, UserPointRepository } from './point.repository'
+import { FootprintTable } from '../database/footprint.table'
 
 @Injectable()
 export class PointService {
@@ -9,15 +10,21 @@ export class PointService {
   constructor(
     private readonly userPointRepository: UserPointRepository,
     private readonly pointHistoryRepository: PointHistoryRepository,
+    private readonly footPrintTable: FootprintTable,
   ) {}
 
   /**
    *
    * @param userId user to charge
    * @param amount amount to charge
+   * @param label
    * @returns balance after charge
    */
-  async charge(userId: number, amount: number): Promise<UserPoint> {
+  async charge(
+    userId: number,
+    amount: number,
+    label?: string,
+  ): Promise<UserPoint> {
     if (amount < 0) {
       throw Error('The amount must be greater than and equal to 0')
     }
@@ -33,6 +40,8 @@ export class PointService {
       userId,
       userPointBeforeUpsert.point + amount,
     )
+
+    this.footPrintTable.print(label)
 
     this.writeLockTable[userId] = false
     // critical section end
@@ -51,9 +60,14 @@ export class PointService {
    *
    * @param userId user to use
    * @param amount amount to use
+   * @param label
    * @returns balance after use
    */
-  async use(userId: number, amount: number): Promise<UserPoint> {
+  async use(
+    userId: number,
+    amount: number,
+    label?: string,
+  ): Promise<UserPoint> {
     // critical section
     await this.waitWriteLock(userId)
     this.writeLockTable[userId] = true
@@ -72,6 +86,8 @@ export class PointService {
       userId,
       pointToUpsert,
     )
+
+    this.footPrintTable.print(label)
 
     this.writeLockTable[userId] = false
     // critical section end
@@ -121,5 +137,9 @@ export class PointService {
       }
       checkLock()
     })
+  }
+
+  footprints() {
+    return this.footPrintTable.footprints
   }
 }
