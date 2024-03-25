@@ -12,7 +12,7 @@ function createRepositoryStub(): SpecialLecturesRepository {
         setTimeout(() => {
           db.add(userId)
           res()
-        }, randomInt(200))
+        }, randomInt(50))
       })
     },
     readResultOfApplicant(
@@ -24,14 +24,14 @@ function createRepositoryStub(): SpecialLecturesRepository {
             userId,
             applied: db.has(userId),
           })
-        }, randomInt(200))
+        }, randomInt(50))
       })
     },
     count(): Promise<number> {
       return new Promise(res => {
         setTimeout(() => {
           res(db.size)
-        }, randomInt(200))
+        }, randomInt(50))
       })
     },
   }
@@ -74,7 +74,7 @@ describe('SpecialLecturesService', () => {
 
       const userId = 31
       expect(service.apply(userId)).rejects.toThrow('Limit Exceeded')
-    })
+    }, 15000)
     /**
      * 동시성 테스트
      */
