@@ -4,7 +4,7 @@ import { AdaptationService } from '../adaptation/adaptation.service'
 
 @Injectable()
 export class SpecialLecturesServiceAdapter {
-  service: SpecialLecturesService
+  readonly service: SpecialLecturesService
 
   constructor(private adaptationService: AdaptationService) {
     this.service = this.adaptationService.adapt(SpecialLecturesService)
