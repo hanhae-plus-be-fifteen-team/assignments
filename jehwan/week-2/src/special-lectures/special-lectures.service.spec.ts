@@ -136,6 +136,12 @@ describe('SpecialLecturesService', () => {
       const applicationResult = await service.read(1)
       expect(applicationResult.applied).toBe(true)
     })
-    it.todo('A user should read `applied === false` if the application fails')
+    it('A user should read `applied === false` if the application fails', async () => {
+      jest.spyOn(service, 'apply').mockRejectedValueOnce(new Error())
+      expect(service.apply(1)).rejects.toThrow(Error)
+
+      const applicationResult = await service.read(1)
+      expect(applicationResult.applied).toBe(false)
+    })
   })
 })
