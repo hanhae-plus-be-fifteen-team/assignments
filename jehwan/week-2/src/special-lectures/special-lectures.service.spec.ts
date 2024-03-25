@@ -34,8 +34,12 @@ function createRepositoryStub(): SpecialLecturesRepository {
         }, randomInt(50))
       })
     },
-    applicants(): number[] {
-      return [...db]
+    applicants(): Promise<number[]> {
+      return new Promise(res => {
+        setTimeout(() => {
+          res([...db])
+        }, randomInt(50))
+      })
     },
   }
 }
@@ -92,7 +96,7 @@ describe('SpecialLecturesService', () => {
       await Promise.allSettled(requests)
 
       // If the sequence is guaranteed, the reservations should be in ascending order of userId.
-      expect(stub.applicants()).toEqual(users)
+      expect(await stub.applicants()).toEqual(users)
     })
   })
   /**
