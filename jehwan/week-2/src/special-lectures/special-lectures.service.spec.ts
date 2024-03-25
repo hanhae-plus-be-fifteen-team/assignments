@@ -1,3 +1,25 @@
+import { SpecialLecturesRepository } from './special-lectures.repository'
+import { SpecialLectureApplicationResult } from './special-lectures.model'
+
+function createRepositoryStub(): SpecialLecturesRepository {
+  const db = new Set<number>()
+
+  return {
+    pushApplicantIntoLecture(userId: number): Promise<void> {
+      db.add(userId)
+      return Promise.resolve()
+    },
+    readResultOfApplicant(
+      userId: number,
+    ): Promise<SpecialLectureApplicationResult> {
+      return Promise.resolve({
+        userId,
+        applied: db.has(userId),
+      })
+    },
+  }
+}
+
 describe('SpecialLecturesService', () => {
   /**
    * (핵심) 특강 신청 API
