@@ -114,11 +114,28 @@ describe('SpecialLecturesService', () => {
       expect(await stub.applicants()).toEqual(users)
     })
   })
+
   /**
    * (기본) 특강 신청 완료 여부 조회 API
    */
   describe('Read the result of the application', () => {
-    it.todo('A user should read `applied === true` if the application succeeds')
+    let stub: SpecialLecturesRepository
+    let service: SpecialLecturesService
+
+    beforeEach(async () => {
+      /**
+       * stubbing the repository and inject into the service
+       */
+      stub = createRepositoryStub()
+      service = new SpecialLecturesService(stub)
+    })
+
+    it('A user should read `applied === true` if the application succeeds', async () => {
+      await service.apply(1)
+
+      const applicationResult = await service.read(1)
+      expect(applicationResult.applied).toBe(true)
+    })
     it.todo('A user should read `applied === false` if the application fails')
   })
 })
