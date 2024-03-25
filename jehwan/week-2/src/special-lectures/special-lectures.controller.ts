@@ -1,7 +1,7 @@
-import { Get, Injectable, Param, Patch } from '@nestjs/common'
+import { Controller, Get, Param, Patch } from '@nestjs/common'
 import { SpecialLecturesServiceAdapter } from './special-lectures.service.adapter'
 
-@Injectable()
+@Controller('/special-lectures')
 export class SpecialLecturesController {
   constructor(private adapter: SpecialLecturesServiceAdapter) {}
 
