@@ -29,5 +29,5 @@ export interface SpecialLecturesRepository {
    *
    * @returns applicants (ensuring the order)
    */
-  applicants(): number[]
+  applicants(): Promise<number[]>
 }
