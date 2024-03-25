@@ -18,4 +18,10 @@ export interface SpecialLecturesRepository {
   readResultOfApplicant(
     userId: number,
   ): Promise<SpecialLectureApplicationResult>
+
+  /**
+   *
+   * @returns the number of applicants
+   */
+  count(): Promise<number>
 }
