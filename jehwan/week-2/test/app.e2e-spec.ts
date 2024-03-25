@@ -72,5 +72,20 @@ describe('AppController (e2e)', () => {
         userId: 1,
       })
     })
+
+    it('should fail to apply for the lecture if the user already applied', async () => {
+      await request(app.getHttpServer()).patch(
+        '/special-lectures/1/application',
+      )
+
+      await request(app.getHttpServer())
+        .patch('/special-lectures/1/application')
+        .expect(400)
+        .expect({
+          message: 'Already Applied',
+          error: 'Bad Request',
+          statusCode: 400,
+        })
+    })
   })
 })
