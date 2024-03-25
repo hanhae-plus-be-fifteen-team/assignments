@@ -11,7 +11,12 @@ import {
 } from '@nestjs/common'
 import { PointHistory, UserPoint } from './point.model'
 import { PointBody as PointDto } from './point.dto'
-import { PointService } from './point.service'
+
+// 아래 코드를 변경하고 테스트를 돌려주세요.
+// case 1. 본 구현 point.service.ts
+// case 2. 대조군 (직접 락 구현) point.service.others.ts
+// case 3. 대조군 (async mutex) point.service.mutex.ts
+import { PointService } from './point.service.others'
 
 @Controller('/point')
 export class PointController {
