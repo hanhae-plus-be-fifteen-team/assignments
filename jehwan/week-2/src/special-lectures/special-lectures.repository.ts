@@ -24,4 +24,10 @@ export interface SpecialLecturesRepository {
    * @returns the number of applicants
    */
   count(): Promise<number>
+
+  /**
+   *
+   * @returns applicants (ensuring the order)
+   */
+  applicants(): number[]
 }
