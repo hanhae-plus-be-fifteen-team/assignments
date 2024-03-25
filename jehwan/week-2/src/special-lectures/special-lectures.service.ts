@@ -11,8 +11,11 @@ export class SpecialLecturesService {
    * @param applicantId - applicant's id for the lecture
    * @returns the result of the application
    */
-  apply(applicantId: number): Promise<SpecialLectureApplicationResult> {
-    return
+  async apply(applicantId: number): Promise<SpecialLectureApplicationResult> {
+    return {
+      userId: 0,
+      applied: false,
+    }
   }
 
   /**
@@ -20,7 +23,10 @@ export class SpecialLecturesService {
    * @param applicantId - applicant's id for the lecture
    * @returns the result of the application
    */
-  read(applicantId: number): Promise<SpecialLectureApplicationResult> {
-    return
+  async read(applicantId: number): Promise<SpecialLectureApplicationResult> {
+    return {
+      userId: 0,
+      applied: false,
+    }
   }
 }
