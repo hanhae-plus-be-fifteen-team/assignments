@@ -1,6 +1,11 @@
 import { SpecialLectureApplicationResult } from './special-lectures.model'
+import { SpecialLecturesRepository } from './special-lectures.repository'
 
 export class SpecialLecturesService {
+  constructor(
+    private readonly specialLectureServiceRepository: SpecialLecturesRepository,
+  ) {}
+
   /**
    *
    * @param applicantId - applicant's id for the lecture
