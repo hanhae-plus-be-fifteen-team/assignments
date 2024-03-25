@@ -30,4 +30,10 @@ export interface SpecialLecturesRepository {
    * @returns applicants (ensuring the order)
    */
   applicants(): Promise<number[]>
+
+  /**
+   *
+   * @param atom A function that guarantees atomicity
+   */
+  withLock<T>(atom: (...args: unknown[]) => Promise<T>): Promise<T>
 }
