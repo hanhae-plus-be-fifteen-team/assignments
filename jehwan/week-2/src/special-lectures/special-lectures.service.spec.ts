@@ -2,9 +2,14 @@ import { SpecialLecturesRepository } from './special-lectures.repository'
 import { SpecialLectureApplicationResult } from './special-lectures.model'
 import { SpecialLecturesService } from './special-lectures.service'
 import { randomInt } from 'node:crypto'
+import { Mutex } from 'async-mutex'
 
 function createRepositoryStub(): SpecialLecturesRepository {
   const db = new Set<number>()
+  /**
+   * 유닛 테스트에서는 실제 DB 를 사용하지 않기 때문에, 락 제어에서 Mutex 를 사용하였습니다.
+   */
+  const mutex = new Mutex()
 
   return {
     pushApplicantIntoLecture(userId: number): Promise<void> {
@@ -40,6 +45,10 @@ function createRepositoryStub(): SpecialLecturesRepository {
           res([...db])
         }, randomInt(50))
       })
+    },
+    withLock<T>(atom: (...args: unknown[]) => Promise<T>): Promise<T> {
+      // Use the mutex to lock the section
+      return mutex.runExclusive(() => atom())
     },
   }
 }
