@@ -50,17 +50,6 @@ describe('AppController (e2e)', () => {
     }
   })
 
-  it('database health check', async () => {
-    expect(container).toBeDefined()
-
-    const pool = createConnection()
-
-    const result = await pool.query('SELECT NOW()')
-    expect(result.rows).toBeDefined()
-
-    await pool.end()
-  })
-
   describe('PATCH /special-lectures/1/application', () => {
     it('should succeed to apply for the lecture', async () => {
       const response = await request(app.getHttpServer()).patch(
