@@ -67,9 +67,14 @@ describe('SpecialLecturesService', () => {
       // the second request is not ok.
       expect(service.apply(userId)).rejects.toThrow('Already Applied')
     })
-    it.todo(
-      'A user should not be able to apply if there are already 30 applications',
-    )
+    it('A user should not be able to apply if there are already 30 applications', async () => {
+      for (let i = 1; i <= 30; i++) {
+        await service.apply(i)
+      }
+
+      const userId = 31
+      expect(service.apply(userId)).rejects.toThrow('Limit Exceeded')
+    })
     /**
      * 동시성 테스트
      */
