@@ -1,5 +1,6 @@
 import { SpecialLectureApplicationResult } from './special-lectures.model'
 import { SpecialLecturesRepository } from './special-lectures.repository'
+import { InternalServerErrorException } from '@nestjs/common'
 
 export class SpecialLecturesService {
   constructor(
@@ -44,9 +45,21 @@ export class SpecialLecturesService {
    * @returns the result of the application
    */
   async read(applicantId: number): Promise<SpecialLectureApplicationResult> {
-    return {
-      userId: 0,
-      applied: false,
+    try {
+      return await this.specialLectureServiceRepository.readResultOfApplicant(
+        applicantId,
+      )
+    } catch (e) {
+      if (e.message === 'Not Applied') {
+        return {
+          userId: applicantId,
+          applied: false,
+        }
+      }
+
+      throw new InternalServerErrorException('Internal Server Error', {
+        cause: e,
+      })
     }
   }
 }
