@@ -18,6 +18,9 @@ function createRepositoryStub(): SpecialLecturesRepository {
         applied: db.has(userId),
       })
     },
+    count(): Promise<number> {
+      return Promise.resolve(db.size)
+    },
   }
 }
 
