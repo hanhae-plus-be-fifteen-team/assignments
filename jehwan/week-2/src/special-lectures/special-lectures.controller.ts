@@ -1,4 +1,11 @@
-import { Controller, Get, Param, Patch } from '@nestjs/common'
+import {
+  BadRequestException,
+  Controller,
+  Get,
+  InternalServerErrorException,
+  Param,
+  Patch,
+} from '@nestjs/common'
 import { SpecialLecturesServiceAdapter } from './special-lectures.service.adapter'
 
 @Controller('/special-lectures')
@@ -12,8 +19,21 @@ export class SpecialLecturesController {
   }
 
   @Patch(':id/application')
-  apply(@Param('id') id: string) {
+  async apply(@Param('id') id: string) {
     const applicantId = Number.parseInt(id)
-    return this.adapter.service.apply(applicantId)
+    try {
+      return await this.adapter.service.apply(applicantId)
+    } catch (e) {
+      switch (e.message) {
+        case 'Limit Exceeded':
+          throw new BadRequestException('Limit Exceeded (maximum 30)')
+        case 'Already Applied':
+          throw new BadRequestException('Already Applied')
+        default: // fallback
+          throw new InternalServerErrorException('Internal Server Exception', {
+            cause: e,
+          })
+      }
+    }
   }
 }
