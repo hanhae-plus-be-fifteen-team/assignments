@@ -41,7 +41,16 @@ describe('SpecialLecturesService', () => {
       expect(applicationResult.userId).toBe(userId)
       expect(applicationResult.applied).toBe(true)
     })
-    it.todo('A user should not be able to apply twice or more for the lecture')
+    it('A user should not be able to apply twice or more for the lecture', async () => {
+      const userId = 1
+      const applicationResult = await service.apply(userId)
+
+      // the first request is ok
+      expect(applicationResult.applied).toBe(true)
+
+      // the second request is not ok.
+      expect(service.apply(userId)).rejects.toThrow('Already Applied')
+    })
     it.todo(
       'A user should not be able to apply if there are already 30 applications',
     )
