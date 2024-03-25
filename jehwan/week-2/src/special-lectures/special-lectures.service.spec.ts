@@ -1,25 +1,38 @@
 import { SpecialLecturesRepository } from './special-lectures.repository'
 import { SpecialLectureApplicationResult } from './special-lectures.model'
 import { SpecialLecturesService } from './special-lectures.service'
+import { randomInt } from 'node:crypto'
 
 function createRepositoryStub(): SpecialLecturesRepository {
   const db = new Set<number>()
 
   return {
     pushApplicantIntoLecture(userId: number): Promise<void> {
-      db.add(userId)
-      return Promise.resolve()
+      return new Promise(res => {
+        setTimeout(() => {
+          db.add(userId)
+          res()
+        }, randomInt(200))
+      })
     },
     readResultOfApplicant(
       userId: number,
     ): Promise<SpecialLectureApplicationResult> {
-      return Promise.resolve({
-        userId,
-        applied: db.has(userId),
+      return new Promise(res => {
+        setTimeout(() => {
+          res({
+            userId,
+            applied: db.has(userId),
+          })
+        }, randomInt(200))
       })
     },
     count(): Promise<number> {
-      return Promise.resolve(db.size)
+      return new Promise(res => {
+        setTimeout(() => {
+          res(db.size)
+        }, randomInt(200))
+      })
     },
   }
 }
