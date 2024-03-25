@@ -35,7 +35,12 @@ describe('SpecialLecturesService', () => {
       service = new SpecialLecturesService(createRepositoryStub())
     })
 
-    it.todo('A user should apply for the lecture')
+    it('A user should apply for the lecture', async () => {
+      const userId = 1
+      const applicationResult = await service.apply(userId)
+      expect(applicationResult.userId).toBe(userId)
+      expect(applicationResult.applied).toBe(true)
+    })
     it.todo('A user should not be able to apply twice or more for the lecture')
     it.todo(
       'A user should not be able to apply if there are already 30 applications',
