@@ -45,13 +45,15 @@ describe('SpecialLecturesService', () => {
    * (핵심) 특강 신청 API
    */
   describe('Application', () => {
+    let stub: SpecialLecturesRepository
     let service: SpecialLecturesService
 
     beforeEach(async () => {
       /**
        * stubbing the repository and inject into the service
        */
-      service = new SpecialLecturesService(createRepositoryStub())
+      stub = createRepositoryStub()
+      service = new SpecialLecturesService(stub)
     })
 
     it('A user should apply for the lecture', async () => {
@@ -81,9 +83,17 @@ describe('SpecialLecturesService', () => {
     /**
      * 동시성 테스트
      */
-    it.todo(
-      'Applications should be processed sequentially even with concurrent requests',
-    )
+    it('Applications should be processed sequentially even with concurrent requests', async () => {
+      // Create users in ascending order
+      const users = Array.from({ length: 30 }, (_, i) => i)
+
+      // Sent requests in ascending order of userId.
+      const requests = users.map(userId => service.apply(userId))
+      await Promise.allSettled(requests)
+
+      // If the sequence is guaranteed, the reservations should be in ascending order of userId.
+      expect(stub.applicants()).toEqual(users)
+    })
   })
   /**
    * (기본) 특강 신청 완료 여부 조회 API
