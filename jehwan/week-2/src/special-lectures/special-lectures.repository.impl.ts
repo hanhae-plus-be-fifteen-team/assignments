@@ -14,7 +14,7 @@ export class SpecialLecturesRepositoryImpl
 
   async pushApplicantIntoLecture(userId: number): Promise<void> {
     await this.pool.query<unknown>(
-      'INSERT INTO specialLectures (userId, applied) VALUES ($1, $2)',
+      'INSERT INTO special_lectures (user_id, applied) VALUES ($1, $2)',
       [userId, true],
     )
   }
@@ -22,8 +22,8 @@ export class SpecialLecturesRepositoryImpl
   async readResultOfApplicant(
     userId: number,
   ): Promise<SpecialLectureApplicationResult> {
-    const result = await this.pool.query<SpecialLectureApplicationResult>(
-      'SELECT userId, applied FROM specialLectures WHERE userId = $1',
+    const result = await this.pool.query<{ user_id: number; applied: boolean }>(
+      'SELECT user_id, applied FROM special_lectures WHERE user_id = $1',
       [userId],
     )
 
@@ -31,12 +31,17 @@ export class SpecialLecturesRepositoryImpl
       throw Error('Not Applied')
     }
 
-    return result.rows[0]
+    const raw = result.rows[0]
+
+    return {
+      userId: raw.user_id,
+      applied: raw.applied,
+    }
   }
 
   async count(): Promise<number> {
     const result = await this.pool.query<{ count: number }>(
-      'SELECT count(*) as count FROM specialLectures',
+      'SELECT count(*) as count FROM special_lectures',
     )
 
     return result.rows[0].count
@@ -48,7 +53,7 @@ export class SpecialLecturesRepositoryImpl
 
   async withLock<T>(atom: () => Promise<T>): Promise<T> {
     await this.pool.query('BEGIN')
-    await this.pool.query('LOCK TABLE specialLectures IN EXCLUSIVE MODE')
+    await this.pool.query('LOCK TABLE special_lectures IN EXCLUSIVE MODE')
     try {
       const result = await atom()
       await this.pool.query('COMMIT')

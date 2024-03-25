@@ -3,7 +3,7 @@ import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 import { AppModule } from '../src/app.module'
 import { GenericContainer, StartedTestContainer } from 'testcontainers'
-import { Pool } from 'pg'
+import { createConnection } from '../src/database'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
@@ -12,15 +12,6 @@ describe('AppController (e2e)', () => {
   process.env.DB_USER = 'user'
   process.env.DB_PASSWORD = 'password'
   process.env.DB_NAME = 'test'
-
-  beforeEach(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [AppModule],
-    }).compile()
-
-    app = moduleFixture.createNestApplication()
-    await app.init()
-  })
 
   beforeEach(async () => {
     console.log('Initialize PG Container ...')
@@ -39,37 +30,47 @@ describe('AppController (e2e)', () => {
       ])
       .start()
     console.log('Initialize PG Container Done')
-  }, 60000)
+
+    const mappedPort = container.getMappedPort(5432)
+    process.env.DB_PORT = mappedPort.toString()
+
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile()
+
+    app = moduleFixture.createNestApplication()
+    await app.init()
+  }, 100000)
 
   afterEach(async () => {
+    await app.close()
+
     if (container !== null) {
       await container.stop()
     }
-
-    await app.close()
   })
 
   it('database health check', async () => {
     expect(container).toBeDefined()
 
-    const connectionStr = `postgresql://user:password@localhost:5432/test`
-    const db = new Pool({ connectionString: connectionStr })
+    const pool = createConnection()
 
-    const result = await db.query('SELECT NOW()')
+    const result = await pool.query('SELECT NOW()')
     expect(result.rows).toBeDefined()
 
-    await db.end()
+    await pool.end()
   })
 
   describe('PATCH /special-lectures/1/application', () => {
     it('should succeed to apply for the lecture', async () => {
-      await request(app.getHttpServer())
-        .patch('/special-lectures/1/application')
-        .expect(200)
-        .expect({
-          userId: 1,
-          applied: true,
-        })
+      const response = await request(app.getHttpServer()).patch(
+        '/special-lectures/1/application',
+      )
+
+      expect(response.body).toMatchObject({
+        applied: true,
+        userId: 1,
+      })
     })
   })
 })

@@ -1,5 +1,5 @@
-create table specialLectures (
+create table if not exists "special_lectures" (
   id serial primary key,
-  userId bigint unique,
+  user_id int unique,
   applied boolean not null
 );

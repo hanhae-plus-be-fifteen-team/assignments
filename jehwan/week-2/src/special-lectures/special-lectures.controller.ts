@@ -30,6 +30,7 @@ export class SpecialLecturesController {
         case 'Already Applied':
           throw new BadRequestException('Already Applied')
         default: // fallback
+          console.log(e)
           throw new InternalServerErrorException('Internal Server Exception', {
             cause: e,
           })

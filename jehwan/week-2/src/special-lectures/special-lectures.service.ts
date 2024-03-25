@@ -19,16 +19,18 @@ export class SpecialLecturesService {
         throw new Error('Limit Exceeded')
       }
 
-      let prevResult: SpecialLectureApplicationResult
+      let prevResult: SpecialLectureApplicationResult = {
+        userId: applicantId,
+        applied: false,
+      }
+
       try {
         prevResult =
           await this.specialLectureServiceRepository.readResultOfApplicant(
             applicantId,
           )
       } catch (e) {
-        if (e.message === 'Not Applied') {
-          prevResult = { userId: applicantId, applied: false }
-        } else {
+        if (e.message !== 'Not Applied') {
           throw e
         }
       }
