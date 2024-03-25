@@ -12,8 +12,11 @@ export class SpecialLecturesRepositoryImpl
     this.pool = createConnection()
   }
 
-  pushApplicantIntoLecture(userId: number): Promise<void> {
-    throw new Error('Method not implemented.')
+  async pushApplicantIntoLecture(userId: number): Promise<void> {
+    await this.pool.query<unknown>(
+      'INSERT INTO specialLectures (userId, applied) VALUES ($1, $2)',
+      [userId, true],
+    )
   }
 
   async readResultOfApplicant(
@@ -31,15 +34,28 @@ export class SpecialLecturesRepositoryImpl
     return result.rows[0]
   }
 
-  count(): Promise<number> {
-    throw new Error('Method not implemented.')
+  async count(): Promise<number> {
+    const result = await this.pool.query<{ count: number }>(
+      'SELECT count(*) as count FROM specialLectures',
+    )
+
+    return result.rows[0].count
   }
 
   applicants(): Promise<number[]> {
     throw new Error('Method not implemented.')
   }
 
-  withLock<T>(atom: (...args: unknown[]) => Promise<T>): Promise<T> {
-    throw new Error('Method not implemented.')
+  async withLock<T>(atom: () => Promise<T>): Promise<T> {
+    await this.pool.query('BEGIN')
+    await this.pool.query('LOCK TABLE specialLectures IN EXCLUSIVE MODE')
+    try {
+      const result = await atom()
+      await this.pool.query('COMMIT')
+      return result
+    } catch (error) {
+      await this.pool.query('ROLLBACK')
+      throw error
+    }
   }
 }
