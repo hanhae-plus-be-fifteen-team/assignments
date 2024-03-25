@@ -12,6 +12,15 @@ export class SpecialLecturesService {
    * @returns the result of the application
    */
   async apply(applicantId: number): Promise<SpecialLectureApplicationResult> {
+    const prevResult =
+      await this.specialLectureServiceRepository.readResultOfApplicant(
+        applicantId,
+      )
+
+    if (prevResult.applied) {
+      throw new Error('Already Applied')
+    }
+
     await this.specialLectureServiceRepository.pushApplicantIntoLecture(
       applicantId,
     )
