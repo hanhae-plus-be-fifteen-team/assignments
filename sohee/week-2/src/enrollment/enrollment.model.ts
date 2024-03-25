@@ -1,6 +1,6 @@
-export type Class = {
-  id: number
-  total: number
+export type Enrollment = {
+  studentId: string
+  classId: number
 }
 
 export enum EnrollResult {
