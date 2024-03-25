@@ -34,6 +34,9 @@ function createRepositoryStub(): SpecialLecturesRepository {
         }, randomInt(50))
       })
     },
+    applicants(): number[] {
+      return [...db]
+    },
   }
 }
 
