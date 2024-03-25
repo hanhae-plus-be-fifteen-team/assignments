@@ -1,6 +1,5 @@
 import { SpecialLectureApplicationResult } from './special-lectures.model'
 import { SpecialLecturesRepository } from './special-lectures.repository'
-import { InternalServerErrorException } from '@nestjs/common'
 
 export class SpecialLecturesService {
   constructor(
@@ -30,9 +29,7 @@ export class SpecialLecturesService {
         if (e.message === 'Not Applied') {
           prevResult = { userId: applicantId, applied: false }
         } else {
-          throw new InternalServerErrorException('Internal Server Error', {
-            cause: e,
-          })
+          throw e
         }
       }
 
@@ -67,10 +64,7 @@ export class SpecialLecturesService {
           applied: false,
         }
       }
-
-      throw new InternalServerErrorException('Internal Server Error', {
-        cause: e,
-      })
+      throw e
     }
   }
 }
