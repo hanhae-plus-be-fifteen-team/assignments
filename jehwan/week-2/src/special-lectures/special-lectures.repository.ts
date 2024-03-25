@@ -37,4 +37,10 @@ export interface SpecialLecturesRepository {
    * @param atom A function that guarantees atomicity
    */
   withLock<T>(atom: (...args: unknown[]) => Promise<T>): Promise<T>
+
+  /**
+   *
+   * db should be closed!
+   */
+  close(): Promise<void>
 }
