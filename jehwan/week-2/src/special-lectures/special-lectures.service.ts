@@ -12,10 +12,13 @@ export class SpecialLecturesService {
    * @returns the result of the application
    */
   async apply(applicantId: number): Promise<SpecialLectureApplicationResult> {
-    return {
-      userId: 0,
-      applied: false,
-    }
+    await this.specialLectureServiceRepository.pushApplicantIntoLecture(
+      applicantId,
+    )
+
+    return this.specialLectureServiceRepository.readResultOfApplicant(
+      applicantId,
+    )
   }
 
   /**
