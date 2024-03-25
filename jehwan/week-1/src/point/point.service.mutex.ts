@@ -1,0 +1,125 @@
+/**
+ * 출처: https://github.com/jsjsjskjs/hhplus-tdd-nest/blob/main/src/point/point.service.ts
+ */
+import {
+  BadRequestException,
+  Injectable,
+  ServiceUnavailableException,
+} from '@nestjs/common'
+import { UserPointTable } from '../database/userpoint.table'
+import { PointHistoryTable } from '../database/pointhistory.table'
+import { PointHistory, TransactionType, UserPoint } from './point.model'
+import { Mutex } from 'async-mutex'
+import { FootprintTable } from '../database/footprint.table'
+
+@Injectable()
+export class PointService {
+  private userLocks = new Map<string, Mutex>()
+
+  constructor(
+    private readonly userDb: UserPointTable,
+    private readonly historyDb: PointHistoryTable,
+    private readonly footPrintTable: FootprintTable,
+  ) {}
+
+  private getUserMutex(userId: number): Mutex {
+    const userIdToString = userId.toString()
+    let mutex = this.userLocks.get(userIdToString)
+    if (!mutex) {
+      mutex = new Mutex()
+      this.userLocks.set(userIdToString, mutex)
+    }
+    return mutex
+  }
+
+  async readPoint(userId: number): Promise<UserPoint> {
+    const mutex = this.getUserMutex(userId)
+    const release = await mutex.acquire()
+    try {
+      return this.userDb.selectById(userId)
+    } catch (e) {
+      throw new ServiceUnavailableException(
+        '포인트 조회 중 오류가 발생했습니다.',
+      )
+    } finally {
+      release()
+    }
+  }
+
+  async readHistories(userId: number): Promise<PointHistory[]> {
+    return this.historyDb.selectAllByUserId(userId)
+  }
+
+  async charge(
+    userId: number,
+    amount: number,
+    label?: string,
+  ): Promise<UserPoint> {
+    const mutex = this.getUserMutex(userId)
+    const release = await mutex.acquire()
+    try {
+      if (amount <= 0 || !Number.isInteger(amount)) {
+        throw new BadRequestException('충전 포인트는 양의 정수여야 합니다.')
+      }
+      const beforeUserPoint = await this.userDb.selectById(userId)
+      const beforePoint = beforeUserPoint.point
+      await this.historyDb.insert(
+        userId,
+        amount,
+        TransactionType.CHARGE,
+        Date.now(),
+      )
+      return await this.userDb.insertOrUpdate(userId, beforePoint + amount)
+    } catch (e) {
+      if (e instanceof BadRequestException) {
+        throw e
+      }
+      throw new ServiceUnavailableException(
+        '포인트 충전 중 오류가 발생했습니다.',
+      )
+    } finally {
+      this.footPrintTable.print(label)
+      release()
+    }
+  }
+
+  async use(
+    userId: number,
+    amount: number,
+    label?: string,
+  ): Promise<UserPoint> {
+    const mutex = this.getUserMutex(userId)
+    const release = await mutex.acquire()
+    try {
+      if (amount <= 0 || !Number.isInteger(amount)) {
+        throw new BadRequestException('사용 포인트는 양의 정수여야 합니다.')
+      }
+      const beforeUserPoint = await this.userDb.selectById(userId)
+      const beforePoint = beforeUserPoint.point
+      if (beforePoint < amount) {
+        throw new BadRequestException('포인트가 부족합니다.')
+      }
+      await this.historyDb.insert(
+        userId,
+        amount,
+        TransactionType.USE,
+        Date.now(),
+      )
+      return await this.userDb.insertOrUpdate(userId, beforePoint - amount)
+    } catch (e) {
+      if (e instanceof BadRequestException) {
+        throw e
+      }
+      throw new ServiceUnavailableException(
+        '포인트 사용 중 오류가 발생했습니다.',
+      )
+    } finally {
+      this.footPrintTable.print(label)
+      release()
+    }
+  }
+
+  footprints() {
+    return this.footPrintTable.footprints
+  }
+}

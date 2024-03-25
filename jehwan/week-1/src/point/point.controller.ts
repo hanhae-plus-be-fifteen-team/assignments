@@ -16,7 +16,7 @@ import { PointBody as PointDto } from './point.dto'
 // case 1. 본 구현 point.service.ts
 // case 2. 대조군 (직접 락 구현) point.service.others.ts
 // case 3. 대조군 (async mutex) point.service.mutex.ts
-import { PointService } from './point.service.others'
+import { PointService } from './point.service.mutex'
 
 @Controller('/point')
 export class PointController {
