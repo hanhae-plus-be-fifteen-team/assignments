@@ -1,5 +1,6 @@
 import { SpecialLecturesRepository } from './special-lectures.repository'
 import { SpecialLectureApplicationResult } from './special-lectures.model'
+import { SpecialLecturesService } from './special-lectures.service'
 
 function createRepositoryStub(): SpecialLecturesRepository {
   const db = new Set<number>()
@@ -25,6 +26,15 @@ describe('SpecialLecturesService', () => {
    * (핵심) 특강 신청 API
    */
   describe('Application', () => {
+    let service: SpecialLecturesService
+
+    beforeEach(async () => {
+      /**
+       * stubbing the repository and inject into the service
+       */
+      service = new SpecialLecturesService(createRepositoryStub())
+    })
+
     it.todo('A user should apply for the lecture')
     it.todo('A user should not be able to apply twice or more for the lecture')
     it.todo(
