@@ -11,3 +11,17 @@
 Persistence 를 위해 `RepositoryInterface`를 작성했습니다. 비즈니스 로직은 `RepositoryInterface`를 참조하며, 실제 구현체
 또한 `RepositoryInterface`를 기반으로 합니다. 이 구조를 통해 사용되는 DB 드라이버와 상관없이 `RepositoryImpl`(구현체)을 통해 DB 드라이버와 비즈니스 로직 간의 커뮤니케이션이
 가능합니다.
+
+## 서버 실행
+
+### Postgres (Docker Compose)
+
+```sh
+docker compose up --build -d
+```
+
+### Nest Application
+
+```sh
+DB_USER=user DB_PASSWORD=password DB_NAME=test pnpm start
+```
