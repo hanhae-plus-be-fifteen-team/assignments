@@ -6,7 +6,7 @@ import { createConnection } from '../database'
 export class SpecialLecturesRepositoryImpl
   implements SpecialLecturesRepository
 {
-  pool: Pool
+  private readonly pool: Pool
 
   constructor() {
     this.pool = createConnection()
@@ -57,5 +57,9 @@ export class SpecialLecturesRepositoryImpl
       await this.pool.query('ROLLBACK')
       throw error
     }
+  }
+
+  async close() {
+    await this.pool.end()
   }
 }
