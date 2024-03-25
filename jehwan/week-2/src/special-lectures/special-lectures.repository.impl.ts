@@ -16,10 +16,19 @@ export class SpecialLecturesRepositoryImpl
     throw new Error('Method not implemented.')
   }
 
-  readResultOfApplicant(
+  async readResultOfApplicant(
     userId: number,
   ): Promise<SpecialLectureApplicationResult> {
-    throw new Error('Method not implemented.')
+    const result = await this.pool.query<SpecialLectureApplicationResult>(
+      'SELECT userId, applied FROM specialLectures WHERE userId = $1',
+      [userId],
+    )
+
+    if (result.rowCount === 0) {
+      throw Error('Not Applied')
+    }
+
+    return result.rows[0]
   }
 
   count(): Promise<number> {
