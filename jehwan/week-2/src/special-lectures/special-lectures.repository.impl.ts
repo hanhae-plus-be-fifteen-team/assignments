@@ -1,15 +1,15 @@
 import { SpecialLectureApplicationResult } from './special-lectures.model'
 import { SpecialLecturesRepository } from './special-lectures.repository'
-import { Client } from 'pg'
+import { Pool } from 'pg'
 import { createConnection } from '../database'
 
 export class SpecialLecturesRepositoryImpl
   implements SpecialLecturesRepository
 {
-  connection: Client
+  pool: Pool
 
   constructor() {
-    this.connection = createConnection()
+    this.pool = createConnection()
   }
 
   pushApplicantIntoLecture(userId: number): Promise<void> {
