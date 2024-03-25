@@ -20,10 +20,21 @@ export class SpecialLecturesService {
         throw new Error('Limit Exceeded')
       }
 
-      const prevResult =
-        await this.specialLectureServiceRepository.readResultOfApplicant(
-          applicantId,
-        )
+      let prevResult: SpecialLectureApplicationResult
+      try {
+        prevResult =
+          await this.specialLectureServiceRepository.readResultOfApplicant(
+            applicantId,
+          )
+      } catch (e) {
+        if (e.message === 'Not Applied') {
+          prevResult = { userId: applicantId, applied: false }
+        } else {
+          throw new InternalServerErrorException('Internal Server Error', {
+            cause: e,
+          })
+        }
+      }
 
       if (prevResult.applied) {
         throw new Error('Already Applied')
