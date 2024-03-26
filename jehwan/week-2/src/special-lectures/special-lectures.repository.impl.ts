@@ -61,6 +61,7 @@ export class SpecialLecturesRepositoryImpl
     atom: (session: pgPromise.ITask<unknown>) => Promise<T>,
   ): Promise<T> {
     return this.pg.tx<T>(async session => {
+      await session.none(`LOCK TABLE special_lectures IN EXCLUSIVE MODE`)
       return await atom(session)
     })
   }
