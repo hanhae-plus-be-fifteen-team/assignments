@@ -2,6 +2,7 @@ import { SpecialLectureApplicationResult } from './special-lectures.model'
 import { SpecialLecturesRepository } from './special-lectures.repository'
 import { createDb } from '../database'
 import pgPromise from 'pg-promise'
+import { Mutex } from 'async-mutex'
 
 export interface SpecialLectureEntity {
   id: number
@@ -14,11 +15,11 @@ export class SpecialLecturesRepositoryImpl
   implements SpecialLecturesRepository
 {
   private readonly pg: pgPromise.IDatabase<unknown>
-  private promiseQueue: Promise<unknown>
+  private mutex: Mutex
 
   constructor() {
     this.pg = createDb()
-    this.promiseQueue = Promise.resolve()
+    this.mutex = new Mutex()
   }
 
   async pushApplicantIntoLecture(
@@ -79,16 +80,16 @@ export class SpecialLecturesRepositoryImpl
    * @returns Sequential execution is guaranteed using Node.js’ event loop.
    */
   async withLock<T>(
-    atom: (session: pgPromise.ITask<unknown>) => Promise<T>,
+    atom: (session?: pgPromise.ITask<unknown>) => Promise<T>,
   ): Promise<T> {
-    const executeWithLock = () =>
-      this.pg.tx<T>(async session => {
+    const release = await this.mutex.acquire()
+    try {
+      return await this.pg.tx<T>(async session => {
         await session.none(`LOCK TABLE special_lectures IN EXCLUSIVE MODE`)
         return await atom(session)
       })
-
-    this.promiseQueue = this.promiseQueue.then(() => executeWithLock())
-
-    return this.promiseQueue as Promise<T>
+    } finally {
+      release()
+    }
   }
 }
