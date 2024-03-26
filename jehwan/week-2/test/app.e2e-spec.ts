@@ -56,8 +56,6 @@ describe('AppController (e2e)', () => {
         '/special-lectures/1/application',
       )
 
-      console.log(response.status)
-
       expect(response.body).toMatchObject({
         applied: true,
         userId: 1,
