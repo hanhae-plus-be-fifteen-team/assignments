@@ -88,6 +88,7 @@ describe('AppController (e2e)', () => {
         ),
       )
 
+      // race! 🚗
       await Promise.allSettled(requests)
 
       const pg = createDb()
