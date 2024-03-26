@@ -1,16 +1,16 @@
 import { SpecialLectureApplicationResult } from './special-lectures.model'
 import { SpecialLecturesRepository } from './special-lectures.repository'
-import { Client } from 'pg'
-import { createConnection } from '../database'
+import { Pool, PoolClient } from 'pg'
+import { createPool } from '../database'
 
 export class SpecialLecturesRepositoryImpl
   implements SpecialLecturesRepository
 {
-  private client: Client
+  private readonly pool: Pool
+  private client: PoolClient | null = null
 
   constructor() {
-    this.client = createConnection()
-    this.client.connect()
+    this.pool = createPool()
   }
 
   async pushApplicantIntoLecture(userId: number): Promise<void> {
@@ -54,11 +54,8 @@ export class SpecialLecturesRepositoryImpl
     throw new Error('Method not implemented.')
   }
 
-  /**
-   * @todo 동시성 해결에 문제가 있어보임...
-   * @todo pg 를 이용하여 트랜잭션 LOCK 좀 더 공부하기
-   */
   async withLock<T>(atom: () => Promise<T>): Promise<T> {
+    this.client = await this.pool.connect()
     try {
       await this.client.query('BEGIN')
       await this.client.query('LOCK TABLE special_lectures IN EXCLUSIVE MODE')
@@ -68,10 +65,15 @@ export class SpecialLecturesRepositoryImpl
     } catch (error) {
       await this.client.query('ROLLBACK')
       throw error
+    } finally {
+      if (this.client) {
+        this.client.release()
+      }
+      this.client = null
     }
   }
 
   async close() {
-    await this.client.end()
+    await this.pool.end()
   }
 }
