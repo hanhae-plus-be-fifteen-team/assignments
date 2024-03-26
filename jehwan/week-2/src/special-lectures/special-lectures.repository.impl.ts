@@ -64,7 +64,10 @@ export class SpecialLecturesRepositoryImpl
   }
 
   /**
+   *
    * @todo Considering locks in a distributed cluster
+   * @param atom A function that guarantees atomicity
+   * @returns Sequential execution is guaranteed using Node.js’ event loop.
    */
   async withLock<T>(
     atom: (session: pgPromise.ITask<unknown>) => Promise<T>,
