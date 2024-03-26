@@ -50,12 +50,6 @@ function createRepositoryStub(): SpecialLecturesRepository {
       // Use the mutex to lock the section
       return mutex.runExclusive(() => atom())
     },
-    /**
-     * close not needed
-     */
-    close(): Promise<void> {
-      return
-    },
   }
 }
 

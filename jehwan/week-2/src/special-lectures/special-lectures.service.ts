@@ -12,8 +12,8 @@ export class SpecialLecturesService {
    * @returns the result of the application
    */
   async apply(applicantId: number): Promise<SpecialLectureApplicationResult> {
-    return this.specialLectureServiceRepository.withLock(async () => {
-      const count = await this.specialLectureServiceRepository.count()
+    return this.specialLectureServiceRepository.withLock(async session => {
+      const count = await this.specialLectureServiceRepository.count(session)
 
       if (count >= 30) {
         throw new Error('Limit Exceeded')
@@ -28,6 +28,7 @@ export class SpecialLecturesService {
         prevResult =
           await this.specialLectureServiceRepository.readResultOfApplicant(
             applicantId,
+            session,
           )
       } catch (e) {
         if (e.message !== 'Not Applied') {
@@ -41,10 +42,12 @@ export class SpecialLecturesService {
 
       await this.specialLectureServiceRepository.pushApplicantIntoLecture(
         applicantId,
+        session,
       )
 
       return this.specialLectureServiceRepository.readResultOfApplicant(
         applicantId,
+        session,
       )
     })
   }

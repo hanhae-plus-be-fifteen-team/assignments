@@ -3,7 +3,6 @@ import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 import { AppModule } from '../src/app.module'
 import { GenericContainer, StartedTestContainer } from 'testcontainers'
-import { createConnection } from '../src/database'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
