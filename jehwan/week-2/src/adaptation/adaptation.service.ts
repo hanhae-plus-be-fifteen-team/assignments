@@ -4,8 +4,8 @@ import { Injectable } from '@nestjs/common'
 export class AdaptationService {
   public adapt<S, P>(
     service: new (...args: unknown[]) => S,
-    providers?: P[],
+    providers?: (new (...args: unknown[]) => P)[],
   ): S {
-    return new service(...(providers ?? []))
+    return new service(...(providers?.map(p => new p()) ?? []))
   }
 }

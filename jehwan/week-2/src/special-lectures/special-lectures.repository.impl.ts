@@ -1,20 +1,22 @@
 import { SpecialLectureApplicationResult } from './special-lectures.model'
 import { SpecialLecturesRepository } from './special-lectures.repository'
-import { Pool, PoolClient } from 'pg'
-import { createPool } from '../database'
+import { createDb } from '../database'
+import pgPromise, { errors } from 'pg-promise'
 
 export class SpecialLecturesRepositoryImpl
   implements SpecialLecturesRepository
 {
-  private readonly pool: Pool
-  private client: PoolClient | null = null
+  private pg: pgPromise.IDatabase<unknown>
 
   constructor() {
-    this.pool = createPool()
+    this.pg = createDb()
   }
 
-  async pushApplicantIntoLecture(userId: number): Promise<void> {
-    await this.client.query<unknown>(
+  async pushApplicantIntoLecture(
+    userId: number,
+    session: pgPromise.ITask<unknown>,
+  ): Promise<void> {
+    await session.none(
       'INSERT INTO special_lectures (user_id, applied) VALUES ($1, $2)',
       [userId, true],
     )
@@ -22,58 +24,43 @@ export class SpecialLecturesRepositoryImpl
 
   async readResultOfApplicant(
     userId: number,
+    session: pgPromise.ITask<unknown>,
   ): Promise<SpecialLectureApplicationResult> {
-    const result = await this.client.query<{
-      user_id: number
-      applied: boolean
-    }>('SELECT user_id, applied FROM special_lectures WHERE user_id = $1', [
-      userId,
-    ])
+    try {
+      const result = await session.one<{ user_id: number; applied: boolean }>(
+        'SELECT user_id, applied FROM special_lectures WHERE user_id = $1',
+        [userId],
+      )
 
-    if (result.rowCount === 0) {
-      throw Error('Not Applied')
-    }
-
-    const raw = result.rows[0]
-
-    return {
-      userId: raw.user_id,
-      applied: raw.applied,
+      return {
+        userId: result.user_id,
+        applied: result.applied,
+      }
+    } catch (e) {
+      if (e.code === errors.queryResultErrorCode.noData) {
+        throw Error('Not Applied')
+      }
+      throw e
     }
   }
 
-  async count(): Promise<number> {
-    const result = await this.client.query<{ count: number }>(
+  async count(session: pgPromise.ITask<unknown>): Promise<number> {
+    const result = await session.one<{ count: number }>(
       'SELECT count(*) as count FROM special_lectures',
     )
 
-    return result.rows[0].count
+    return result.count
   }
 
-  applicants(): Promise<number[]> {
+  applicants(session: pgPromise.ITask<unknown>): Promise<number[]> {
     throw new Error('Method not implemented.')
   }
 
-  async withLock<T>(atom: () => Promise<T>): Promise<T> {
-    this.client = await this.pool.connect()
-    try {
-      await this.client.query('BEGIN')
-      await this.client.query('LOCK TABLE special_lectures IN EXCLUSIVE MODE')
-      const result = await atom()
-      await this.client.query('COMMIT')
-      return result
-    } catch (error) {
-      await this.client.query('ROLLBACK')
-      throw error
-    } finally {
-      if (this.client) {
-        this.client.release()
-      }
-      this.client = null
-    }
-  }
-
-  async close() {
-    await this.pool.end()
+  async withLock<T>(
+    atom: (session: pgPromise.ITask<unknown>) => Promise<T>,
+  ): Promise<T> {
+    return this.pg.tx<T>(async session => {
+      return await atom(session)
+    })
   }
 }
