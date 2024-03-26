@@ -98,4 +98,29 @@ describe('AppController (e2e)', () => {
       expect(applications.map(app => app.user_id)).toEqual(users)
     }, 30000)
   })
+
+  describe('GET /special-lectures/1/application', () => {
+    it('should succeed to read applied === true for the lecture', async () => {
+      await request(app.getHttpServer()).patch(
+        '/special-lectures/1/application',
+      )
+
+      await request(app.getHttpServer())
+        .get('/special-lectures/1/application')
+        .expect(200)
+        .expect({
+          userId: 1,
+          applied: true,
+        })
+    })
+    it('should succeed to read applied === false for the lecture', async () => {
+      await request(app.getHttpServer())
+        .get('/special-lectures/1/application')
+        .expect(200)
+        .expect({
+          userId: 1,
+          applied: false,
+        })
+    })
+  })
 })

@@ -23,9 +23,11 @@ export class SpecialLecturesRepositoryImpl
 
   async pushApplicantIntoLecture(
     userId: number,
-    session: pgPromise.ITask<unknown>,
+    session?: pgPromise.ITask<unknown>,
   ): Promise<void> {
-    await session.none(
+    const conn = session ?? this.pg
+
+    await conn.none(
       'INSERT INTO special_lectures (user_id, applied) VALUES ($1, $2)',
       [userId, true],
     )
@@ -33,9 +35,11 @@ export class SpecialLecturesRepositoryImpl
 
   async readResultOfApplicant(
     userId: number,
-    session: pgPromise.ITask<unknown>,
+    session?: pgPromise.ITask<unknown>,
   ): Promise<SpecialLectureApplicationResult> {
-    const result = await session.oneOrNone<SpecialLectureEntity>(
+    const conn = session ?? this.pg
+
+    const result = await conn.oneOrNone<SpecialLectureEntity>(
       'SELECT user_id, applied, created_at FROM special_lectures WHERE user_id = $1',
       [userId],
     )
@@ -53,8 +57,10 @@ export class SpecialLecturesRepositoryImpl
     }
   }
 
-  async count(session: pgPromise.ITask<unknown>): Promise<number> {
-    const result = await session.one<{ count: number }>(
+  async count(session?: pgPromise.ITask<unknown>): Promise<number> {
+    const conn = session ?? this.pg
+
+    const result = await conn.one<{ count: number }>(
       'SELECT count(*) as count FROM special_lectures',
     )
 
@@ -62,7 +68,7 @@ export class SpecialLecturesRepositoryImpl
   }
 
   // @todo implement
-  applicants(session: pgPromise.ITask<unknown>): Promise<number[]> {
+  applicants(session?: pgPromise.ITask<unknown>): Promise<number[]> {
     throw new Error('Method not implemented.')
   }
 
