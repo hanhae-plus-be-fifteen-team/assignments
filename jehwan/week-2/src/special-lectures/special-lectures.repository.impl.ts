@@ -6,10 +6,12 @@ import pgPromise from 'pg-promise'
 export class SpecialLecturesRepositoryImpl
   implements SpecialLecturesRepository
 {
-  private pg: pgPromise.IDatabase<unknown>
+  private readonly pg: pgPromise.IDatabase<unknown>
+  private promiseQueue: Promise<unknown>
 
   constructor() {
     this.pg = createDb()
+    this.promiseQueue = Promise.resolve()
   }
 
   async pushApplicantIntoLecture(
@@ -59,9 +61,14 @@ export class SpecialLecturesRepositoryImpl
   async withLock<T>(
     atom: (session: pgPromise.ITask<unknown>) => Promise<T>,
   ): Promise<T> {
-    return this.pg.tx<T>(async session => {
-      await session.none(`LOCK TABLE special_lectures IN EXCLUSIVE MODE`)
-      return await atom(session)
-    })
+    const executeWithLock = () =>
+      this.pg.tx<T>(async session => {
+        await session.none(`LOCK TABLE special_lectures IN EXCLUSIVE MODE`)
+        return await atom(session)
+      })
+
+    this.promiseQueue = this.promiseQueue.then(() => executeWithLock())
+
+    return this.promiseQueue as Promise<T>
   }
 }
