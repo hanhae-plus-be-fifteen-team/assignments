@@ -1,11 +1,15 @@
 import { Injectable } from '@nestjs/common'
-import { IEnrollmentRepository } from './enrollment.interface'
-import { EnrollmentTable } from 'src/database/enrollment.table'
-import { EnrollResult } from '../enrollment.model'
+import { EnrollResult } from '../models/enrollment.result'
+import { Repository } from 'typeorm'
+import { InjectRepository } from '@nestjs/typeorm'
+import { Enrollment } from '../models/enrollment.entities'
 
 @Injectable()
-export class EnrollmentRepository implements IEnrollmentRepository {
-  constructor(private readonly enrollmentDb: EnrollmentTable) {}
+export class EnrollmentRepository {
+  constructor(
+    @InjectRepository(Enrollment)
+    private readonly repository: Repository<Enrollment>,
+  ) {}
   private _total = 0
   // fixme : class의 total값은 db에서 가져온다.
 
@@ -14,7 +18,8 @@ export class EnrollmentRepository implements IEnrollmentRepository {
       return EnrollResult.AlreadyEnrolled
     if (this._total <= 30) {
       this._total += 1
-      await this.enrollmentDb.insertOrUpdate(studentId, classId)
+      const enrollment = { studentId: studentId, classId: classId }
+      await this.repository.save(enrollment)
       return EnrollResult.Success
     } else {
       return EnrollResult.Closed
@@ -22,6 +27,9 @@ export class EnrollmentRepository implements IEnrollmentRepository {
   }
 
   async getClasses(studentId: string): Promise<number[]> {
-    return await this.enrollmentDb.selectById(studentId)
+    const enrollments = await this.repository.find({
+      where: { studentId: studentId },
+    })
+    return enrollments.map(e => e.classId)
   }
 }
