@@ -52,6 +52,7 @@ export class SpecialLecturesRepositoryImpl
     return result.count
   }
 
+  // @todo implement
   applicants(session: pgPromise.ITask<unknown>): Promise<number[]> {
     throw new Error('Method not implemented.')
   }
