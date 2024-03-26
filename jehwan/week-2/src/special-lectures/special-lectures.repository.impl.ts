@@ -41,7 +41,10 @@ export class SpecialLecturesRepositoryImpl
     )
 
     if (!result) {
-      throw Error('Not Applied')
+      return {
+        userId,
+        applied: false,
+      }
     }
 
     return {
