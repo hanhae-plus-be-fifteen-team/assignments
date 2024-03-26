@@ -3,6 +3,7 @@ import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 import { AppModule } from '../src/app.module'
 import { GenericContainer, StartedTestContainer } from 'testcontainers'
+import { createDb } from '../src/database'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
@@ -55,6 +56,8 @@ describe('AppController (e2e)', () => {
         '/special-lectures/1/application',
       )
 
+      console.log(response.status)
+
       expect(response.body).toMatchObject({
         applied: true,
         userId: 1,
@@ -75,5 +78,25 @@ describe('AppController (e2e)', () => {
           statusCode: 400,
         })
     })
+
+    it('Applications should be processed sequentially even with concurrent requests', async () => {
+      const users = Array.from({ length: 30 }, (_, i) => i)
+
+      const requests = users.map(user =>
+        request(app.getHttpServer()).patch(
+          `/special-lectures/${user}/application`,
+        ),
+      )
+
+      await Promise.allSettled(requests)
+
+      const pg = createDb()
+      const applications = await pg.many(
+        'SELECT * FROM special_lectures ORDER BY created_at',
+      )
+
+      // If the sequence is guaranteed, the reservations should be in ascending order of userId.
+      expect(applications.map(app => app.user_id)).toEqual(users)
+    }, 30000)
   })
 })
