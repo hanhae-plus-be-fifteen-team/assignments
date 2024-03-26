@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { EnrollResult } from './enrollment.model'
+import { EnrollResult } from './models/enrollment.result'
 import { EnrollmentRepository } from './repository/enrollment.repository'
 
 @Injectable()

@@ -7,8 +7,8 @@ import {
   ValidationPipe,
 } from '@nestjs/common'
 import { EnrollmentService } from './enrollment.service'
-import { EnrollResult } from './enrollment.model'
-import { EnrollBody as EnrollDto } from './enrollment.dto'
+import { EnrollResult } from './models/enrollment.result'
+import { ClassDto } from './models/enrollment.dto'
 
 @Controller('enrollment')
 export class EnrollmentController {
@@ -18,11 +18,9 @@ export class EnrollmentController {
   @Patch(':id/enroll')
   async enroll(
     @Param('id') studentId,
-    @Body(ValidationPipe) enrollDto: EnrollDto,
+    @Body(ValidationPipe) classDto: ClassDto,
   ): Promise<EnrollResult> {
-    const classId = enrollDto.id
-    const result = await this.enrollService.enroll(studentId, classId)
-    return result
+    return await this.enrollService.enroll(studentId, classDto.id)
   }
 
   // 신청한 class 조회
