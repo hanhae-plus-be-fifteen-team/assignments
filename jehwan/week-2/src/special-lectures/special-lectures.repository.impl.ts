@@ -3,6 +3,13 @@ import { SpecialLecturesRepository } from './special-lectures.repository'
 import { createDb } from '../database'
 import pgPromise from 'pg-promise'
 
+export interface SpecialLectureEntity {
+  id: number
+  user_id: number
+  applied: boolean
+  created_at: Date
+}
+
 export class SpecialLecturesRepositoryImpl
   implements SpecialLecturesRepository
 {
@@ -28,12 +35,10 @@ export class SpecialLecturesRepositoryImpl
     userId: number,
     session: pgPromise.ITask<unknown>,
   ): Promise<SpecialLectureApplicationResult> {
-    const result = await session.oneOrNone<{
-      user_id: number
-      applied: boolean
-    }>('SELECT user_id, applied FROM special_lectures WHERE user_id = $1', [
-      userId,
-    ])
+    const result = await session.oneOrNone<SpecialLectureEntity>(
+      'SELECT user_id, applied, created_at FROM special_lectures WHERE user_id = $1',
+      [userId],
+    )
 
     if (!result) {
       throw Error('Not Applied')
