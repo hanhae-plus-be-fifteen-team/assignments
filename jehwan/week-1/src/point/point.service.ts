@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common'
 import { PointHistory, TransactionType, UserPoint } from './point.model'
 import { PointHistoryRepository, UserPointRepository } from './point.repository'
+import { Mutex } from 'async-mutex'
 
 @Injectable()
 export class PointService {
-  private writeLockTable: Record<number, boolean> = {}
+  private writeLockTable: Record<number, Mutex> = {}
 
   constructor(
     private readonly userPointRepository: UserPointRepository,
@@ -22,9 +23,8 @@ export class PointService {
       throw Error('The amount must be greater than and equal to 0')
     }
 
-    // critical section
-    await this.waitWriteLock(userId)
-    this.writeLockTable[userId] = true
+    const mutex = this.getMutex(userId)
+    const release = await mutex.acquire()
 
     const userPointBeforeUpsert =
       await this.userPointRepository.selectById(userId)
@@ -34,8 +34,7 @@ export class PointService {
       userPointBeforeUpsert.point + amount,
     )
 
-    this.writeLockTable[userId] = false
-    // critical section end
+    release()
 
     await this.pointHistoryRepository.insert(
       userId,
@@ -54,9 +53,8 @@ export class PointService {
    * @returns balance after use
    */
   async use(userId: number, amount: number): Promise<UserPoint> {
-    // critical section
-    await this.waitWriteLock(userId)
-    this.writeLockTable[userId] = true
+    const mutex = this.getMutex(userId)
+    const release = await mutex.acquire()
 
     const userPointBeforeUpsert =
       await this.userPointRepository.selectById(userId)
@@ -64,7 +62,7 @@ export class PointService {
     const pointToUpsert = userPointBeforeUpsert.point - amount
 
     if (pointToUpsert < 0) {
-      this.writeLockTable[userId] = false
+      release()
       throw new Error('Limit Exceeded')
     }
 
@@ -73,8 +71,7 @@ export class PointService {
       pointToUpsert,
     )
 
-    this.writeLockTable[userId] = false
-    // critical section end
+    release()
 
     await this.pointHistoryRepository.insert(
       userId,
@@ -104,22 +101,11 @@ export class PointService {
     return this.pointHistoryRepository.selectAllByUserId(userId)
   }
 
-  /**
-   *
-   * busy waiting
-   * @param userId user's ID
-   * @param interval checking interval (default 10ms)
-   */
-  private waitWriteLock(userId: number, interval?: number) {
-    return new Promise(resolve => {
-      const checkLock = () => {
-        if (this.writeLockTable[userId]) {
-          setTimeout(checkLock, interval ?? 10)
-        } else {
-          resolve(true)
-        }
-      }
-      checkLock()
-    })
+  private getMutex(userId: number): Mutex {
+    if (!this.writeLockTable[userId]) {
+      this.writeLockTable[userId] = new Mutex()
+      return this.writeLockTable[userId]
+    }
+    return this.writeLockTable[userId]
   }
 }
