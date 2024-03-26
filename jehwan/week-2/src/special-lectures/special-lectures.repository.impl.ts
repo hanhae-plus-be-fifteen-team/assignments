@@ -58,6 +58,9 @@ export class SpecialLecturesRepositoryImpl
     throw new Error('Method not implemented.')
   }
 
+  /**
+   * @todo Considering locks in a distributed cluster
+   */
   async withLock<T>(
     atom: (session: pgPromise.ITask<unknown>) => Promise<T>,
   ): Promise<T> {
