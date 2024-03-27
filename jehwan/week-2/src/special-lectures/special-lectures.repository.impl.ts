@@ -1,10 +1,11 @@
-import { Application, SpecialLectureCount } from './special-lectures.model'
 import { ISpecialLecturesRepository } from './special-lectures.repository.interface'
 import { createDb } from '../database'
 import pgPromise from 'pg-promise'
 import { Mutex } from 'async-mutex'
 import { SpecialLectureCountEntity } from './entities/special-lectures.entity'
 import { ApplicationEntity } from './entities/application.entity'
+import { Application } from './models/application.model'
+import { SpecialLectureCount } from './models/special-lectures.model'
 
 export class SpecialLecturesRepositoryImpl
   implements ISpecialLecturesRepository

@@ -1,5 +1,5 @@
-import { Application } from './special-lectures.model'
 import { ISpecialLecturesRepository } from './special-lectures.repository.interface'
+import { Application } from './models/application.model'
 
 export class SpecialLecturesService {
   constructor(
