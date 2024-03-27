@@ -4,7 +4,6 @@ import * as request from 'supertest'
 import { AppModule } from '../src/app.module'
 import { GenericContainer, StartedTestContainer } from 'testcontainers'
 import { Application } from 'src/special-lectures/models/application.model'
-import { v4 as uuidv4 } from 'uuid'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
@@ -91,8 +90,6 @@ describe('AppController (e2e)', () => {
     })
 
     it('should fail to apply for the lecture if the user already applied', async () => {
-      const userId = 1
-
       // send the same request twice
       await request(app.getHttpServer()).patch(
         `/special-lectures/${lectureId}/applications/${userId}`,

@@ -5,9 +5,10 @@ export interface IUsersRepository {
   /**
    *
    * @param model CreateUserModel
+   * @param session Session for Transaction
    * @returns A user that created
    */
-  createOneUser(model: CreateUserModel): Promise<UserModel>
+  createOneUser(model: CreateUserModel, session?: unknown): Promise<UserModel>
 
   /**
    *
@@ -15,4 +16,10 @@ export interface IUsersRepository {
    * @returns A user that matched
    */
   readOneUser(id: string): Promise<UserModel | null>
+
+  /**
+   *
+   * @param atom A function that guarantees atomicity
+   */
+  withLock<T>(atom: (session?: unknown) => Promise<T>): Promise<T>
 }
