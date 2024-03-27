@@ -77,7 +77,7 @@ function createRepositoryStub(): ISpecialLecturesRepository {
         }, randomInt(50))
       })
     },
-    createLecture(model: CreateSpecialLecturesModel): Promise<SpecialLecture> {
+    createLecture(model: CreateSpecialLecturesModel): Promise<void> {
       return new Promise(res => {
         setTimeout(() => {
           lectureTable.set(++serial, {
@@ -92,7 +92,7 @@ function createRepositoryStub(): ISpecialLecturesRepository {
             count: 0,
           })
 
-          res(lectureTable.get(serial))
+          res()
         }, randomInt(50))
       })
     },

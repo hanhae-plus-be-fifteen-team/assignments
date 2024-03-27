@@ -2,14 +2,20 @@ import { ISpecialLecturesRepository } from './special-lectures.repository.interf
 import { createDb } from '../database'
 import pgPromise from 'pg-promise'
 import { Mutex } from 'async-mutex'
-import { SpecialLectureCountEntity } from './entities/special-lectures.entity'
+import {
+  SpecialLectureCountEntity,
+  SpecialLectureEntity,
+} from './entities/special-lectures.entity'
 import { ApplicationEntity } from './entities/application.entity'
 import { Application } from './models/application.model'
-import {
-  SpecialLecture,
-  SpecialLectureCount,
-} from './models/special-lectures.model'
+import { SpecialLectureCount } from './models/special-lectures.model'
 import { CreateSpecialLecturesModel } from './models/create-special-lectures.model'
+
+enum Table {
+  SPECIAL_LECTURES = 'special_lectures',
+  SPECIAL_LECTURE_COUNTS = 'special_lectures_count',
+  APPLICATIONS = 'applications',
+}
 
 export class SpecialLecturesRepositoryImpl
   implements ISpecialLecturesRepository
@@ -37,7 +43,8 @@ export class SpecialLecturesRepositoryImpl
     const conn = session ?? this.pg
 
     await conn.none(
-      'INSERT INTO special_lectures (lecture_id, user_id, applied) VALUES ($1, $2, $3)',
+      `INSERT INTO ${Table.APPLICATIONS} (lecture_id, user_id, applied)
+       VALUES ($1, $2, $3)`,
       [lectureId, userId, true],
     )
   }
@@ -58,7 +65,10 @@ export class SpecialLecturesRepositoryImpl
     const conn = session ?? this.pg
 
     const result = await conn.oneOrNone<ApplicationEntity>(
-      'SELECT user_id, applied, created_at FROM special_lectures WHERE lecture_id = $1 AND user_id = $2',
+      `SELECT user_id, applied, created_at
+       FROM ${Table.APPLICATIONS}
+       WHERE lecture_id = $1
+         AND user_id = $2`,
       [lectureId, userId],
     )
 
@@ -84,7 +94,9 @@ export class SpecialLecturesRepositoryImpl
     const conn = session ?? this.pg
 
     const result = await conn.oneOrNone<SpecialLectureCountEntity>(
-      'SELECT lecture_id, maximum, count FROM special_lecture_counts where lecture_id = $1',
+      `SELECT lecture_id, maximum, count
+       FROM ${Table.SPECIAL_LECTURE_COUNTS}
+       where lecture_id = $1`,
       [lectureId],
     )
 
@@ -102,11 +114,25 @@ export class SpecialLecturesRepositoryImpl
    * @returns Array of Applications (ensuring the order)
    * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
-  readAllApplications(
+  async readAllApplications(
     lectureId: number,
     session?: pgPromise.ITask<unknown>,
   ): Promise<Application[]> {
-    throw new Error('Method not implemented.')
+    const conn = session ?? this.pg
+
+    const result = await conn.many<ApplicationEntity>(
+      `SELECT lecture_id, user_id, created_at
+       FROM ${Table.APPLICATIONS}
+       WHERE lecture_id = $1`,
+      [lectureId],
+    )
+
+    return result.map<Application>(r => ({
+      lectureId: r.lecture_id,
+      userId: r.user_id,
+      timestamp: r.created_at,
+      applied: true,
+    }))
   }
 
   /**
@@ -121,7 +147,10 @@ export class SpecialLecturesRepositoryImpl
     const release = await this.mutex.acquire()
     try {
       return await this.pg.tx<T>(async session => {
-        await session.none(`LOCK TABLE special_lectures IN EXCLUSIVE MODE`)
+        /**
+         * @todo refactoring
+         */
+        // await session.none(`LOCK TABLE special_lectures IN EXCLUSIVE MODE`)
         return await atom(session)
       })
     } finally {
@@ -132,10 +161,33 @@ export class SpecialLecturesRepositoryImpl
   /**
    *
    * @param model CreateSpecialLecturesModel
+   * @param session the session for Transaction
    * @returns SpecialLecture
    * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
-  createLecture(model: CreateSpecialLecturesModel): Promise<SpecialLecture> {
-    throw new Error('Method not implemented.')
+  async createLecture(
+    model: CreateSpecialLecturesModel,
+    session?: pgPromise.ITask<unknown>,
+  ): Promise<void> {
+    const conn = session ?? this.pg
+
+    await conn.none(
+      `INSERT INTO ${Table.SPECIAL_LECTURES} (title, opening_date)
+       values ($1, $2)`,
+      [model.title, model.openingDate],
+    )
+
+    const inserted = await conn.one<SpecialLectureEntity>(
+      `SELECT *
+       FROM ${Table.SPECIAL_LECTURES}
+       ORDER BY id DESC
+       LIMIT 1`,
+    )
+
+    await conn.none(
+      `INSERT INTO ${Table.SPECIAL_LECTURE_COUNTS} (lecture_id, maximum, count)
+       values ($1, $2, $3)`,
+      [inserted.id, model.maximum, 0],
+    )
   }
 }
