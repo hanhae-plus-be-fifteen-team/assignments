@@ -67,6 +67,11 @@ export class SpecialLecturesController {
     throw new NotImplementedException()
   }
 
+  /**
+   *
+   * @param body CreateSpecialLecturesDto
+   * @returns lecture that created
+   */
   @Post()
   createLecture(@Body(new ValidationPipe()) body: CreateSpecialLecturesDto) {
     throw new NotImplementedException()
