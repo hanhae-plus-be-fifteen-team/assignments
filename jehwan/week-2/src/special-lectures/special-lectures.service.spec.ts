@@ -136,7 +136,9 @@ describe('SpecialLecturesService', () => {
       }
 
       const userId = 31
-      expect(service.applyForLecture(lectureId, userId)).rejects.toThrow('Limit Exceeded')
+      expect(service.applyForLecture(lectureId, userId)).rejects.toThrow(
+        'Limit Exceeded',
+      )
     }, 15000)
     /**
      * 동시성 테스트
@@ -147,7 +149,9 @@ describe('SpecialLecturesService', () => {
       const users = Array.from({ length: 30 }, (_, i) => i)
 
       // Sent requests in ascending order of userId.
-      const requests = users.map(userId => service.applyForLecture(lectureId, userId))
+      const requests = users.map(userId =>
+        service.applyForLecture(lectureId, userId),
+      )
       await Promise.allSettled(requests)
 
       // If the sequence is guaranteed, the reservations should be in ascending order of userId.
@@ -176,7 +180,10 @@ describe('SpecialLecturesService', () => {
       const userId = 1
       await service.applyForLecture(lectureId, userId)
 
-      const applicationResult = await service.readOneApplication(lectureId, userId)
+      const applicationResult = await service.readOneApplication(
+        lectureId,
+        userId,
+      )
       expect(applicationResult.applied).toBe(true)
     })
     it('A user should read `applied === false` if the application fails', async () => {
@@ -187,7 +194,10 @@ describe('SpecialLecturesService', () => {
       jest.spyOn(service, 'applyForLecture').mockRejectedValueOnce(new Error())
       expect(service.applyForLecture(lectureId, userId)).rejects.toThrow(Error)
 
-      const applicationResult = await service.readOneApplication(lectureId, userId)
+      const applicationResult = await service.readOneApplication(
+        lectureId,
+        userId,
+      )
       expect(applicationResult.applied).toBe(false)
     })
   })
