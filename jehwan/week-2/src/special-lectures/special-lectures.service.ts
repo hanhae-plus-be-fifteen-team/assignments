@@ -1,9 +1,9 @@
 import { SpecialLectureApplicationResult } from './special-lectures.model'
-import { SpecialLecturesRepository } from './special-lectures.repository'
+import { ISpecialLecturesRepository } from './special-lectures.repository.interface'
 
 export class SpecialLecturesService {
   constructor(
-    private readonly specialLectureServiceRepository: SpecialLecturesRepository,
+    private readonly specialLectureServiceRepository: ISpecialLecturesRepository,
   ) {}
 
   /**

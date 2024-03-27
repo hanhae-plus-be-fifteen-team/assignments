@@ -1,6 +1,6 @@
 import { SpecialLectureApplicationResult } from './special-lectures.model'
 
-export interface SpecialLecturesRepository {
+export interface ISpecialLecturesRepository {
   /**
    *
    * @param userId  applicant's id for the lecture

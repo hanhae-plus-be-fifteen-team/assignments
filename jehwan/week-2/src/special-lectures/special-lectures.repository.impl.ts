@@ -1,5 +1,5 @@
 import { SpecialLectureApplicationResult } from './special-lectures.model'
-import { SpecialLecturesRepository } from './special-lectures.repository'
+import { ISpecialLecturesRepository } from './special-lectures.repository.interface'
 import { createDb } from '../database'
 import pgPromise from 'pg-promise'
 import { Mutex } from 'async-mutex'
@@ -23,7 +23,7 @@ interface SpecialLectureEntity {
 }
 
 export class SpecialLecturesRepositoryImpl
-  implements SpecialLecturesRepository
+  implements ISpecialLecturesRepository
 {
   private readonly pg: pgPromise.IDatabase<unknown>
   private mutex: Mutex
