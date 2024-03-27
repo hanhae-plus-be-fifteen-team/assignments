@@ -16,7 +16,6 @@ export interface ISpecialLecturesRepository {
    * @param userId  applicant's id for the lecture
    * @param session the session for Transaction
    * @returns the result of the application
-   * @throws Error ('Not Applied') if not applied
    */
   readResultOfApplicant(
     userId: number,
