@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   InternalServerErrorException,
+  NotImplementedException,
   Param,
   ParseIntPipe,
   Patch,
@@ -26,11 +27,40 @@ export class SpecialLecturesController {
    * @returns user's application result
    */
   @Get(':lecture-id/applications/:user-id')
-  readApplication(
+  readOneApplication(
     @Param('lecture-id', ParseIntPipe) lectureId: number,
     @Param('user-id', ParseIntPipe) userId: number,
   ) {
     return this.adapter.service.read(lectureId, userId)
+  }
+
+  /**
+   *
+   * @param lectureId lecture's id
+   * @returns all applications
+   */
+  @Get(':lecture-id/applications')
+  readAllApplications(@Param('lecture-id', ParseIntPipe) lectureId: number) {
+    throw new NotImplementedException()
+  }
+
+  /**
+   *
+   * @param lectureId lecture's id
+   * @returns lecture that matches with id
+   */
+  @Get(':lecture-id')
+  readOneLecture(@Param('lecture-id', ParseIntPipe) lectureId: number) {
+    throw new NotImplementedException()
+  }
+
+  /**
+   *
+   * @returns all lectures
+   */
+  @Get()
+  readAllLectures() {
+    throw new NotImplementedException()
   }
 
   /**
