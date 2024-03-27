@@ -68,7 +68,7 @@ export function createRepositoryStub(): ISpecialLecturesRepository {
         }, randomInt(50))
       })
     },
-    createLecture(model: CreateSpecialLecturesModel): Promise<void> {
+    createLecture(model: CreateSpecialLecturesModel): Promise<number> {
       return new Promise(res => {
         setTimeout(() => {
           lectureTable.set(++serial, {
@@ -83,13 +83,20 @@ export function createRepositoryStub(): ISpecialLecturesRepository {
             count: 0,
           })
 
-          res()
+          res(serial)
         }, randomInt(50))
       })
     },
     withLock<T>(atom: (...args: unknown[]) => Promise<T>): Promise<T> {
       // Use the mutex to lock the section
       return mutex.runExclusive(() => atom())
+    },
+    readOneLecture(lectureId: number): Promise<SpecialLecture | null> {
+      return new Promise(res => {
+        setTimeout(() => {
+          res(lectureTable.get(lectureId) ?? null)
+        }, randomInt(50))
+      })
     },
   }
 }
