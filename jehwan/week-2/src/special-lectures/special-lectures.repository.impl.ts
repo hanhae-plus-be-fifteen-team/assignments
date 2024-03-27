@@ -1,25 +1,25 @@
-import { SpecialLectureApplicationResult } from './special-lectures.model'
+import { Application, SpecialLectureCount } from './special-lectures.model'
 import { ISpecialLecturesRepository } from './special-lectures.repository.interface'
 import { createDb } from '../database'
 import pgPromise from 'pg-promise'
 import { Mutex } from 'async-mutex'
 
-/**
- * @description
- * Entity 를 DB Driver 에서 데이터를 다루는 형태라고 정의
- * 따라서, context 를 pg-promise 로 한정하여 RepositoryImpl 에 정의
- *
- * RepositoryImpl -> [ Repository Interface ] <- Service 구조에서
- * [ Repository Interface ] 에서 교환되는 데이터 형식은
- * 도메인 모델인 special-lectures.model.ts 에 정의된 `SpecialLectureApplicationResult`
- *
- * .readResultOfApplicant() 메서드에서 [Entity -> Domain] 으로 변환해서 반환
- */
 interface SpecialLectureEntity {
   id: number
-  user_id: number
-  applied: boolean
+  title: string
   created_at: Date
+}
+
+interface ApplicationEntity {
+  lecture_id: number
+  user_id: number
+  created_at: Date
+}
+
+interface SpecialLectureCountEntity {
+  lecture_id: number
+  maximum: number
+  count: number
 }
 
 export class SpecialLecturesRepositoryImpl
@@ -35,68 +35,79 @@ export class SpecialLecturesRepositoryImpl
 
   /**
    *
+   * @param lectureId lecture's id
    * @param userId  applicant's id for the lecture
    * @param session the session for Transaction
    */
   async pushApplicantIntoLecture(
+    lectureId: number,
     userId: number,
     session?: pgPromise.ITask<unknown>,
   ): Promise<void> {
     const conn = session ?? this.pg
 
     await conn.none(
-      'INSERT INTO special_lectures (user_id, applied) VALUES ($1, $2)',
-      [userId, true],
+      'INSERT INTO special_lectures (lecture_id, user_id, applied) VALUES ($1, $2, $3)',
+      [lectureId, userId, true],
     )
   }
 
   /**
    *
+   * @param lectureId lecture's id
    * @param userId  applicant's id for the lecture
    * @param session the session for Transaction
    * @returns Business Domain Model (SpecialLectureApplicationResult)
    */
   async readResultOfApplicant(
+    lectureId: number,
     userId: number,
     session?: pgPromise.ITask<unknown>,
-  ): Promise<SpecialLectureApplicationResult> {
+  ): Promise<Application> {
     const conn = session ?? this.pg
 
-    const result = await conn.oneOrNone<SpecialLectureEntity>(
-      'SELECT user_id, applied, created_at FROM special_lectures WHERE user_id = $1',
-      [userId],
+    const result = await conn.oneOrNone<ApplicationEntity>(
+      'SELECT user_id, applied, created_at FROM special_lectures WHERE lecture_id = $1 AND user_id = $2',
+      [lectureId, userId],
     )
 
-    if (!result) {
-      return {
-        userId,
-        applied: false,
-      }
-    }
-
     return {
-      userId: result.user_id,
-      applied: result.applied,
+      lectureId,
+      userId,
+      applied: !!result,
+      timestamp: result ? result.created_at : null,
     }
   }
 
   /**
    *
+   * @param lectureId lecture's id
    * @param session the session for Transaction
    * @returns count for the lecture
    */
-  async count(session?: pgPromise.ITask<unknown>): Promise<number> {
+  async count(
+    lectureId: number,
+    session?: pgPromise.ITask<unknown>,
+  ): Promise<SpecialLectureCount> {
     const conn = session ?? this.pg
 
-    const result = await conn.one<{ count: number }>(
-      'SELECT count(*) as count FROM special_lectures',
+    const result = await conn.oneOrNone<SpecialLectureCountEntity>(
+      'SELECT lecture_id, maximum, count FROM special_lecture_counts where lecture_id = $1',
+      [lectureId],
     )
 
-    return result.count
+    return {
+      lectureId,
+      maximum: result?.maximum ?? 0,
+      count: result?.count ?? 0,
+    }
   }
 
   // @todo implement
-  applicants(session?: pgPromise.ITask<unknown>): Promise<number[]> {
+  applicants(
+    lectureId: number,
+    session?: pgPromise.ITask<unknown>,
+  ): Promise<Application[]> {
     throw new Error('Method not implemented.')
   }
 
