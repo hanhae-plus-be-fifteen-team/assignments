@@ -93,11 +93,8 @@ function createRepositoryStub(): ISpecialLecturesRepository {
   }
 }
 
-describe('SpecialLecturesService', () => {
-  /**
-   * (핵심) 특강 신청 API
-   */
-  describe('Application', () => {
+describe('신청 API', () => {
+  describe('(핵심) 특강 신청 API', () => {
     let stub: ISpecialLecturesRepository
     let service: SpecialLecturesService
 
@@ -160,10 +157,7 @@ describe('SpecialLecturesService', () => {
     })
   })
 
-  /**
-   * (기본) 특강 신청 완료 여부 조회 API
-   */
-  describe('Read the result of the application', () => {
+  describe('(기본) 특강 신청 완료 여부 조회 API', () => {
     let stub: ISpecialLecturesRepository
     let service: SpecialLecturesService
 
