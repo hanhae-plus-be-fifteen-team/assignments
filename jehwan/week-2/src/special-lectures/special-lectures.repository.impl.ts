@@ -65,7 +65,7 @@ export class SpecialLecturesRepositoryImpl
   ): Promise<Application> {
     const conn = session ?? this.pg
 
-    const result = await conn.oneOrNone<ApplicationEntity>(
+    const applicationEntity = await conn.oneOrNone<ApplicationEntity>(
       `SELECT user_id, applied, created_at
        FROM ${Table.APPLICATIONS}
        WHERE lecture_id = $1
@@ -76,8 +76,8 @@ export class SpecialLecturesRepositoryImpl
     return {
       lectureId,
       userId,
-      applied: !!result,
-      timestamp: result ? result.created_at : null,
+      applied: !!applicationEntity,
+      timestamp: applicationEntity ? applicationEntity.created_at : null,
     }
   }
 
@@ -93,7 +93,7 @@ export class SpecialLecturesRepositoryImpl
   ): Promise<SpecialLectureCount> {
     const conn = session ?? this.pg
 
-    const result = await conn.oneOrNone<SpecialLectureCountEntity>(
+    const countEntity = await conn.oneOrNone<SpecialLectureCountEntity>(
       `SELECT lecture_id, maximum, count
        FROM ${Table.SPECIAL_LECTURE_COUNTS}
        where lecture_id = $1`,
@@ -102,8 +102,8 @@ export class SpecialLecturesRepositoryImpl
 
     return {
       lectureId,
-      maximum: result?.maximum ?? 0,
-      count: result?.count ?? 0,
+      maximum: countEntity?.maximum ?? 0,
+      count: countEntity?.count ?? 0,
     }
   }
 
@@ -119,17 +119,17 @@ export class SpecialLecturesRepositoryImpl
   ): Promise<Application[]> {
     const conn = session ?? this.pg
 
-    const result = await conn.many<ApplicationEntity>(
+    const applicationEntities = await conn.many<ApplicationEntity>(
       `SELECT lecture_id, user_id, created_at
        FROM ${Table.APPLICATIONS}
        WHERE lecture_id = $1`,
       [lectureId],
     )
 
-    return result.map<Application>(r => ({
-      lectureId: r.lecture_id,
-      userId: r.user_id,
-      timestamp: r.created_at,
+    return applicationEntities.map<Application>(entity => ({
+      lectureId: entity.lecture_id,
+      userId: entity.user_id,
+      timestamp: entity.created_at,
       applied: true,
     }))
   }
