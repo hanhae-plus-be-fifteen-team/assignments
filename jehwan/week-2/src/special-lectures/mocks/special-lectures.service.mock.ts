@@ -9,11 +9,11 @@ export function initMockRepo(): Record<
 > {
   return {
     createLecture: jest.fn(),
-    pushApplicantIntoLecture: jest.fn(),
+    createApplication: jest.fn(),
     readAllLectures: jest.fn(),
     readAllApplications: jest.fn(),
     readOneLecture: jest.fn(),
-    readResultOfApplicant: jest.fn(),
+    readOneApplication: jest.fn(),
     count: jest.fn(),
     withLock: jest.fn(),
   }
@@ -33,7 +33,7 @@ export function setNormalForApplyForLecture(
     maximum: 30,
     count: 0,
   })
-  mockRepo.readResultOfApplicant
+  mockRepo.readOneApplication
     .mockReturnValueOnce({
       applied: false,
     })
@@ -56,7 +56,7 @@ export function setAbnormalAlreadyApplied(
     maximum: 30,
     count: 0,
   })
-  mockRepo.readResultOfApplicant.mockReturnValue({
+  mockRepo.readOneApplication.mockReturnValue({
     applied: true,
   })
 }
@@ -81,7 +81,7 @@ export function setNormalAppliedTrue(
   mockRepo: ReturnType<typeof initMockRepo>,
 ) {
   mockRepo.readOneLecture.mockReturnValue({})
-  mockRepo.readResultOfApplicant.mockReturnValue({
+  mockRepo.readOneApplication.mockReturnValue({
     applied: true,
   })
 }
@@ -90,7 +90,7 @@ export function setNormalAppliedFalse(
   mockRepo: ReturnType<typeof initMockRepo>,
 ) {
   mockRepo.readOneLecture.mockReturnValue({})
-  mockRepo.readResultOfApplicant.mockReturnValue({
+  mockRepo.readOneApplication.mockReturnValue({
     applied: false,
   })
 }
