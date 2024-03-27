@@ -8,9 +8,13 @@ export interface SpecialLecture {
    */
   id: number
   /**
-   * title for the lecture
+   * @description title for the lecture
    */
   title: string
+  /**
+   * @description application deadline
+   */
+  openingDate: Date
 }
 
 export interface SpecialLectureCount {
