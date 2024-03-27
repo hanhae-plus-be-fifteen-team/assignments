@@ -9,6 +9,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  ValidationPipe,
 } from '@nestjs/common'
 import { SpecialLecturesServiceAdapter } from './special-lectures.service.adapter'
 import { CreateSpecialLecturesDto } from './dto/create-special-lectures.dto'
@@ -67,7 +68,7 @@ export class SpecialLecturesController {
   }
 
   @Post()
-  createLecture(@Body() body: CreateSpecialLecturesDto) {
+  createLecture(@Body(new ValidationPipe()) body: CreateSpecialLecturesDto) {
     throw new NotImplementedException()
   }
 
