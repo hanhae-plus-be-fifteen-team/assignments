@@ -10,17 +10,18 @@ import {
 import { CreateSpecialLecturesModel } from './models/create-special-lectures.model'
 
 function createRepositoryStub(): ISpecialLecturesRepository {
+  let serial = 0
+  const lectureTable = new Map<number, SpecialLecture>()
   const applicationTable = new Map<string, Application>()
   const countTable = new Map<number, SpecialLectureCount>()
   const mutex = new Mutex()
 
   return {
     pushApplicantIntoLecture(lectureId: number, userId: number): Promise<void> {
-      return new Promise(res => {
+      return new Promise((res, rej) => {
         setTimeout(() => {
-          /**
-           * assuming that lecture already created in the stub
-           */
+          if (!lectureTable.has(lectureId)) return rej('LECTURE DOES NOT EXIST')
+
           applicationTable.set(`${lectureId}:${userId}`, {
             lectureId,
             userId,
@@ -39,42 +40,26 @@ function createRepositoryStub(): ISpecialLecturesRepository {
       lectureId: number,
       userId: number,
     ): Promise<Application> {
-      return new Promise(res => {
+      return new Promise((res, rej) => {
         setTimeout(() => {
-          /**
-           * assuming that lecture already created in the stub
-           */
-          if (!applicationTable.has(`${lectureId}:${userId}`)) {
-            return res({
-              lectureId,
-              userId,
-              applied: false,
-              timestamp: null,
-            })
-          }
+          if (!lectureTable.has(lectureId)) return rej('LECTURE DOES NOT EXIST')
+
+          const key = `${lectureId}:${userId}`
+          const application = applicationTable.get(key)
 
           return res({
             lectureId,
             userId,
-            applied: applicationTable.get(`${lectureId}:${userId}`).applied,
-            timestamp: applicationTable.get(`${lectureId}:${userId}`).timestamp,
+            applied: application?.applied ?? false,
+            timestamp: application?.timestamp ?? null,
           })
         }, randomInt(50))
       })
     },
     count(lectureId: number): Promise<SpecialLectureCount> {
-      return new Promise(res => {
+      return new Promise((res, rej) => {
         setTimeout(() => {
-          /**
-           * assuming that lecture already created in the stub
-           */
-          if (!countTable.has(lectureId)) {
-            countTable.set(lectureId, {
-              lectureId,
-              maximum: 30,
-              count: 0,
-            })
-          }
+          if (!lectureTable.has(lectureId)) return rej('LECTURE DOES NOT EXIST')
 
           res({
             ...countTable.get(lectureId),
@@ -83,15 +68,33 @@ function createRepositoryStub(): ISpecialLecturesRepository {
         }, randomInt(50))
       })
     },
-    readAllApplications(): Promise<Application[]> {
-      return new Promise(res => {
+    readAllApplications(lectureId: number): Promise<Application[]> {
+      return new Promise((res, rej) => {
+        if (!lectureTable.has(lectureId)) return rej('LECTURE DOES NOT EXIST')
+
         setTimeout(() => {
           res([...applicationTable.values()])
         }, randomInt(50))
       })
     },
     createLecture(model: CreateSpecialLecturesModel): Promise<SpecialLecture> {
-      return Promise.resolve(undefined)
+      return new Promise(res => {
+        setTimeout(() => {
+          lectureTable.set(++serial, {
+            id: serial,
+            title: model.title,
+            openingDate: model.openingDate,
+          })
+
+          countTable.set(serial, {
+            lectureId: serial,
+            maximum: model.maximum,
+            count: 0,
+          })
+
+          res(lectureTable.get(serial))
+        }, randomInt(50))
+      })
     },
     withLock<T>(atom: (...args: unknown[]) => Promise<T>): Promise<T> {
       // Use the mutex to lock the section
