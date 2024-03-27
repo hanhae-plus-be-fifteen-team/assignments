@@ -106,4 +106,29 @@ export class SpecialLecturesService {
       )
     })
   }
+
+  /**
+   *
+   * @param lectureId lecture's id
+   * @returns all applications for the lecture
+   * @throws Error 'Lecture Does Not Exist' when there is no matched lecture
+   **/
+  async readAllApplications(lectureId: number): Promise<Application[]> {
+    const lecture =
+      await this.specialLectureServiceRepository.readOneLecture(lectureId)
+
+    if (!lecture) {
+      throw new Error('Lecture Does Not Exist')
+    }
+
+    return this.specialLectureServiceRepository.readAllApplications(lectureId)
+  }
+
+  /**
+   *
+   * @returns all lectures
+   **/
+  readAllLectures(): Promise<SpecialLecture[]> {
+    return this.specialLectureServiceRepository.readAllLectures()
+  }
 }

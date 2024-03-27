@@ -77,6 +77,13 @@ export interface ISpecialLecturesRepository {
 
   /**
    *
+   * @param session the session for Transaction
+   * @returns All SpecialLecture
+   */
+  readAllLectures(session?: unknown): Promise<SpecialLecture[]>
+
+  /**
+   *
    * @param atom A function that guarantees atomicity
    */
   withLock<T>(atom: (session?: unknown) => Promise<T>): Promise<T>
