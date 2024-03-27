@@ -10,6 +10,8 @@ export class SpecialLecturesService {
    * @param lectureId lecture's id
    * @param applicantId - applicant's id for the lecture
    * @returns the result of the application
+   * @throws Error 'Limit Exceeded' when count >= 30
+   * @throws Error 'Already Applied' when applied === true
    */
   async apply(lectureId: number, applicantId: number): Promise<Application> {
     return this.specialLectureServiceRepository.withLock(async session => {
