@@ -13,7 +13,8 @@ create table if not exists "special_lectures_count" (
 
 create table if not exists "users" (
   id uuid primary key,
-  username varchar(255) not null
+  username varchar(255) not null,
+  created_at timestamp default now()
 );
 
 create table if not exists "applications" (
