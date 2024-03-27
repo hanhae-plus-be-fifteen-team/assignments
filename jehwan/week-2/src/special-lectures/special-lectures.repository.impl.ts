@@ -3,24 +3,8 @@ import { ISpecialLecturesRepository } from './special-lectures.repository.interf
 import { createDb } from '../database'
 import pgPromise from 'pg-promise'
 import { Mutex } from 'async-mutex'
-
-interface SpecialLectureEntity {
-  id: number
-  title: string
-  created_at: Date
-}
-
-interface ApplicationEntity {
-  lecture_id: number
-  user_id: number
-  created_at: Date
-}
-
-interface SpecialLectureCountEntity {
-  lecture_id: number
-  maximum: number
-  count: number
-}
+import { SpecialLectureCountEntity } from './entities/special-lectures.entity'
+import { ApplicationEntity } from './entities/application.entity'
 
 export class SpecialLecturesRepositoryImpl
   implements ISpecialLecturesRepository
