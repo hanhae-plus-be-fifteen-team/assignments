@@ -98,5 +98,12 @@ export function createRepositoryStub(): ISpecialLecturesRepository {
         }, randomInt(50))
       })
     },
+    readAllLectures(): Promise<SpecialLecture[]> {
+      return new Promise(res => {
+        setTimeout(() => {
+          res([...lectureTable.values()])
+        }, randomInt(50))
+      })
+    },
   }
 }

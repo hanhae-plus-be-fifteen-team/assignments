@@ -216,4 +216,24 @@ export class SpecialLecturesRepositoryImpl
       openingDate: lectureEntity.opening_date,
     }
   }
+
+  /**
+   *
+   * @param session the session for Transaction
+   * @returns all lectures
+   */
+  async readAllLectures(
+    session?: pgPromise.ITask<unknown>,
+  ): Promise<SpecialLecture[]> {
+    const conn = session ?? this.pg
+
+    const lecturesEntities = await conn.many<SpecialLectureEntity>(`SELECT *
+                                                                    FROM ${Table.SPECIAL_LECTURES}`)
+
+    return lecturesEntities.map(entity => ({
+      id: entity.id,
+      title: entity.title,
+      openingDate: entity.opening_date,
+    }))
+  }
 }
