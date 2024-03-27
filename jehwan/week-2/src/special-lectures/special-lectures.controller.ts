@@ -4,6 +4,7 @@ import {
   Get,
   InternalServerErrorException,
   Param,
+  ParseIntPipe,
   Patch,
 } from '@nestjs/common'
 import { SpecialLecturesServiceAdapter } from './special-lectures.service.adapter'
@@ -18,17 +19,21 @@ export class SpecialLecturesController {
    */
   constructor(private adapter: SpecialLecturesServiceAdapter) {}
 
-  @Get(':id/application')
-  read(@Param('id') id: string) {
-    const applicantId = Number.parseInt(id)
-    return this.adapter.service.read(applicantId)
+  @Get(':lecture-id/applications/:user-id')
+  readApplication(
+    @Param('lecture-id', ParseIntPipe) lectureId: number,
+    @Param('user-id', ParseIntPipe) userId: number,
+  ) {
+    return this.adapter.service.read(lectureId, userId)
   }
 
-  @Patch(':id/application')
-  async apply(@Param('id') id: string) {
-    const applicantId = Number.parseInt(id)
+  @Patch(':lecture-id/applications/:user-id')
+  async applyForLecture(
+    @Param('lecture-id', ParseIntPipe) lectureId: number,
+    @Param('user-id', ParseIntPipe) userId: number,
+  ) {
     try {
-      return await this.adapter.service.apply(applicantId)
+      return await this.adapter.service.apply(lectureId, userId)
     } catch (e) {
       switch (e.message) {
         case 'Limit Exceeded':
