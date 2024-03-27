@@ -1,10 +1,10 @@
-import { SpecialLecturesRepository } from './special-lectures.repository'
+import { ISpecialLecturesRepository } from './special-lectures.repository.interface'
 import { SpecialLectureApplicationResult } from './special-lectures.model'
 import { SpecialLecturesService } from './special-lectures.service'
 import { randomInt } from 'node:crypto'
 import { Mutex } from 'async-mutex'
 
-function createRepositoryStub(): SpecialLecturesRepository {
+function createRepositoryStub(): ISpecialLecturesRepository {
   const db = new Set<number>()
   /**
    * 유닛 테스트에서는 실제 DB 를 사용하지 않기 때문에, 락 제어에서 Mutex 를 사용하였습니다.
@@ -58,7 +58,7 @@ describe('SpecialLecturesService', () => {
    * (핵심) 특강 신청 API
    */
   describe('Application', () => {
-    let stub: SpecialLecturesRepository
+    let stub: ISpecialLecturesRepository
     let service: SpecialLecturesService
 
     beforeEach(async () => {
@@ -113,7 +113,7 @@ describe('SpecialLecturesService', () => {
    * (기본) 특강 신청 완료 여부 조회 API
    */
   describe('Read the result of the application', () => {
-    let stub: SpecialLecturesRepository
+    let stub: ISpecialLecturesRepository
     let service: SpecialLecturesService
 
     beforeEach(async () => {
