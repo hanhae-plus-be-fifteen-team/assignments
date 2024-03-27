@@ -35,7 +35,7 @@ export class SpecialLecturesController {
     @Param('lecture-id', ParseIntPipe) lectureId: number,
     @Param('user-id', ParseIntPipe) userId: number,
   ) {
-    return this.adapter.service.read(lectureId, userId)
+    return this.adapter.service.readOneApplication(lectureId, userId)
   }
 
   /**
@@ -85,7 +85,7 @@ export class SpecialLecturesController {
     @Param('user-id', ParseIntPipe) userId: number,
   ) {
     try {
-      return await this.adapter.service.apply(lectureId, userId)
+      return await this.adapter.service.applyForLecture(lectureId, userId)
     } catch (e) {
       switch (e.message) {
         case 'Limit Exceeded':

@@ -112,31 +112,31 @@ describe('SpecialLecturesService', () => {
     it('A user should apply for the lecture', async () => {
       const lectureId = 1
       const userId = 1
-      const applicationResult = await service.apply(lectureId, userId)
+      const applicationResult = await service.applyForLecture(lectureId, userId)
       expect(applicationResult.userId).toBe(userId)
       expect(applicationResult.applied).toBe(true)
     })
     it('A user should not be able to apply twice or more for the lecture', async () => {
       const lectureId = 1
       const userId = 1
-      const applicationResult = await service.apply(lectureId, userId)
+      const applicationResult = await service.applyForLecture(lectureId, userId)
 
       // the first request is ok
       expect(applicationResult.applied).toBe(true)
 
       // the second request is not ok.
-      expect(service.apply(lectureId, userId)).rejects.toThrow(
+      expect(service.applyForLecture(lectureId, userId)).rejects.toThrow(
         'Already Applied',
       )
     })
     it('A user should not be able to apply if there are already 30 applications', async () => {
       const lectureId = 1
       for (let userId = 1; userId <= 30; userId++) {
-        await service.apply(lectureId, userId)
+        await service.applyForLecture(lectureId, userId)
       }
 
       const userId = 31
-      expect(service.apply(lectureId, userId)).rejects.toThrow('Limit Exceeded')
+      expect(service.applyForLecture(lectureId, userId)).rejects.toThrow('Limit Exceeded')
     }, 15000)
     /**
      * 동시성 테스트
@@ -147,7 +147,7 @@ describe('SpecialLecturesService', () => {
       const users = Array.from({ length: 30 }, (_, i) => i)
 
       // Sent requests in ascending order of userId.
-      const requests = users.map(userId => service.apply(lectureId, userId))
+      const requests = users.map(userId => service.applyForLecture(lectureId, userId))
       await Promise.allSettled(requests)
 
       // If the sequence is guaranteed, the reservations should be in ascending order of userId.
@@ -174,9 +174,9 @@ describe('SpecialLecturesService', () => {
     it('A user should read `applied === true` if the application succeeds', async () => {
       const lectureId = 1
       const userId = 1
-      await service.apply(lectureId, userId)
+      await service.applyForLecture(lectureId, userId)
 
-      const applicationResult = await service.read(lectureId, userId)
+      const applicationResult = await service.readOneApplication(lectureId, userId)
       expect(applicationResult.applied).toBe(true)
     })
     it('A user should read `applied === false` if the application fails', async () => {
@@ -184,10 +184,10 @@ describe('SpecialLecturesService', () => {
       const userId = 1
 
       // mock apply always returns Error
-      jest.spyOn(service, 'apply').mockRejectedValueOnce(new Error())
-      expect(service.apply(lectureId, userId)).rejects.toThrow(Error)
+      jest.spyOn(service, 'applyForLecture').mockRejectedValueOnce(new Error())
+      expect(service.applyForLecture(lectureId, userId)).rejects.toThrow(Error)
 
-      const applicationResult = await service.read(lectureId, userId)
+      const applicationResult = await service.readOneApplication(lectureId, userId)
       expect(applicationResult.applied).toBe(false)
     })
   })
