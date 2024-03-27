@@ -5,7 +5,7 @@
 export interface SpecialLectureEntity {
   id: number
   title: string
-  created_at: Date
+  opening_date: Date
 }
 
 /**
