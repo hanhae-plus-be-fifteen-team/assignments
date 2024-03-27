@@ -2,7 +2,8 @@ import { ISpecialLecturesRepository } from './special-lectures.repository.interf
 import { SpecialLecturesService } from './special-lectures.service'
 import { randomInt } from 'node:crypto'
 import { Mutex } from 'async-mutex'
-import { Application, SpecialLectureCount } from './special-lectures.model'
+import { Application } from './models/application.model'
+import { SpecialLectureCount } from './models/special-lectures.model'
 
 function createRepositoryStub(): ISpecialLecturesRepository {
   const applicationTable = new Map<string, Application>()
