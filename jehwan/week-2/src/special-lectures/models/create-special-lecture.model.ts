@@ -1,4 +1,4 @@
-export interface CreateSpecialLecturesModel {
+export interface CreateSpecialLectureModel {
   /**
    * @description title for the lecture
    */

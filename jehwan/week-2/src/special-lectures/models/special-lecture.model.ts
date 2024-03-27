@@ -4,9 +4,9 @@
  */
 export interface SpecialLecture {
   /**
-   * @description id for the lecture
+   * @description UUID
    */
-  id: number
+  id: string
   /**
    * @description title for the lecture
    */
@@ -19,9 +19,13 @@ export interface SpecialLecture {
 
 export interface SpecialLectureCount {
   /**
+   * UUID
+   */
+  id: string
+  /**
    * @description reference for the lecture
    */
-  lectureId: number
+  lectureId: string
   /**
    * @description associated lecture when a lookup is requested
    */

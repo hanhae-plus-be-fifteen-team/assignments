@@ -4,7 +4,8 @@
  * N:1 relations with SpecialLectureEntity
  */
 export interface ApplicationEntity {
-  lecture_id: number
-  user_id: number
+  id: string
+  lecture_id: string
+  user_id: string
   created_at: Date
 }

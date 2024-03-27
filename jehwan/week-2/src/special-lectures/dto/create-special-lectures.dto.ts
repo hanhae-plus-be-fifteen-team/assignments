@@ -1,10 +1,10 @@
-import { IsDate, IsNumber, IsString } from 'class-validator'
+import { IsDateString, IsNumber, IsString } from 'class-validator'
 
 export class CreateSpecialLecturesDto {
   @IsString()
   title: string
 
-  @IsDate()
+  @IsDateString()
   openingDate: Date
 
   @IsNumber()
