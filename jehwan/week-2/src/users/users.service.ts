@@ -10,7 +10,9 @@ export class UsersService {
    * @returns A user that created
    */
   createOneUser(model: CreateUserModel) {
-    return this.userRepository.createOneUser(model)
+    return this.userRepository.withLock(session => {
+      return this.userRepository.createOneUser(model, session)
+    })
   }
 
   /**

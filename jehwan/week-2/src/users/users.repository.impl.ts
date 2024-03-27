@@ -12,7 +12,16 @@ export class UsersRepositoryImpl implements IUsersRepository {
     this.pg = createDb()
   }
 
-  async createOneUser(model: CreateUserModel): Promise<UserModel> {
+  withLock<T>(atom: (session?: unknown) => Promise<T>): Promise<T> {
+    return this.pg.tx<T>(() => atom())
+  }
+
+  async createOneUser(
+    model: CreateUserModel,
+    session?: pgPromise.ITask<unknown>,
+  ): Promise<UserModel> {
+    const conn = session ?? this.pg
+
     await this.pg.none('INSERT INTO users (username) values ($1)', [
       model.username,
     ])
