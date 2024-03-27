@@ -1,10 +1,16 @@
-import { Injectable } from '@nestjs/common'
+import { Inject, Injectable } from '@nestjs/common'
 import { EnrollResult } from './models/enrollment.result'
-import { EnrollmentRepository } from './repository/enrollment.repository'
+import {
+  IENROLLMENT_REPOSITORY,
+  IEnrollmentRepository,
+} from './repository/enrollment.interface'
 
 @Injectable()
 export class EnrollmentService {
-  constructor(private readonly enrollRepository: EnrollmentRepository) {}
+  constructor(
+    @Inject(IENROLLMENT_REPOSITORY)
+    private readonly enrollRepository: IEnrollmentRepository,
+  ) {}
 
   async enroll(studentId: string, classId: number): Promise<EnrollResult> {
     return await this.enrollRepository.enroll(studentId, classId)

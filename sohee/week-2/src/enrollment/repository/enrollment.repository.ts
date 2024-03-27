@@ -3,9 +3,10 @@ import { EnrollResult } from '../models/enrollment.result'
 import { Repository } from 'typeorm'
 import { InjectRepository } from '@nestjs/typeorm'
 import { Enrollment } from '../models/enrollment.entities'
+import { IEnrollmentRepository } from './enrollment.interface'
 
 @Injectable()
-export class EnrollmentRepository {
+export class EnrollmentRepository implements IEnrollmentRepository {
   constructor(
     @InjectRepository(Enrollment)
     private readonly repository: Repository<Enrollment>,
