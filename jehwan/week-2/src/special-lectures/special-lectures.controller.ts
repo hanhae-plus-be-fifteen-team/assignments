@@ -10,6 +10,12 @@ import { SpecialLecturesServiceAdapter } from './special-lectures.service.adapte
 
 @Controller('/special-lectures')
 export class SpecialLecturesController {
+  /**
+   *
+   * @param adapter
+   * @description
+   * Referencing the service adapter, not the service directly.
+   */
   constructor(private adapter: SpecialLecturesServiceAdapter) {}
 
   @Get(':id/application')
