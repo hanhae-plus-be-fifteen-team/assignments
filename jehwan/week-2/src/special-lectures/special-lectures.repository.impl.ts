@@ -8,7 +8,10 @@ import {
 } from './entities/special-lectures.entity'
 import { ApplicationEntity } from './entities/application.entity'
 import { Application } from './models/application.model'
-import { SpecialLectureCount } from './models/special-lectures.model'
+import {
+  SpecialLecture,
+  SpecialLectureCount,
+} from './models/special-lectures.model'
 import { CreateSpecialLecturesModel } from './models/create-special-lectures.model'
 
 enum Table {
@@ -163,7 +166,7 @@ export class SpecialLecturesRepositoryImpl
   async createLecture(
     model: CreateSpecialLecturesModel,
     session?: pgPromise.ITask<unknown>,
-  ): Promise<void> {
+  ): Promise<number> {
     const conn = session ?? this.pg
 
     await conn.none(
@@ -172,8 +175,8 @@ export class SpecialLecturesRepositoryImpl
       [model.title, model.openingDate],
     )
 
-    const inserted = await conn.one<SpecialLectureEntity>(
-      `SELECT *
+    const inserted = await conn.one<{ id: number }>(
+      `SELECT id
        FROM ${Table.SPECIAL_LECTURES}
        ORDER BY id DESC
        LIMIT 1`,
@@ -184,5 +187,33 @@ export class SpecialLecturesRepositoryImpl
        values ($1, $2, $3)`,
       [inserted.id, model.maximum, 0],
     )
+
+    return inserted.id
+  }
+
+  /**
+   *
+   * @param lectureId lecture's id
+   * @param session the session for Transaction
+   * @returns lecture that matches
+   */
+  async readOneLecture(
+    lectureId: number,
+    session?: pgPromise.ITask<unknown>,
+  ): Promise<SpecialLecture | null> {
+    const conn = session ?? this.pg
+
+    const lectureEntity = await conn.oneOrNone<SpecialLectureEntity>(
+      `SELECT *
+       FROM ${Table.SPECIAL_LECTURES}
+       WHERE id = $1`,
+      [lectureId],
+    )
+
+    return {
+      id: lectureEntity.id,
+      title: lectureEntity.title,
+      openingDate: lectureEntity.opening_date,
+    }
   }
 }
