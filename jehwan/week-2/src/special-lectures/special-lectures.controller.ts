@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   Get,
   InternalServerErrorException,
@@ -7,8 +8,10 @@ import {
   Param,
   ParseIntPipe,
   Patch,
+  Post,
 } from '@nestjs/common'
 import { SpecialLecturesServiceAdapter } from './special-lectures.service.adapter'
+import { CreateSpecialLecturesDto } from './dto/create-special-lectures.dto'
 
 @Controller('/special-lectures')
 export class SpecialLecturesController {
@@ -60,6 +63,11 @@ export class SpecialLecturesController {
    */
   @Get()
   readAllLectures() {
+    throw new NotImplementedException()
+  }
+
+  @Post()
+  createLecture(@Body() body: CreateSpecialLecturesDto) {
     throw new NotImplementedException()
   }
 
