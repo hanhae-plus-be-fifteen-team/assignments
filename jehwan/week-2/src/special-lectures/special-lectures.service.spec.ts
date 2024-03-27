@@ -128,8 +128,11 @@ describe('신청 API', () => {
     it('A user should apply for the lecture', async () => {
       const lectureId = 1
       const userId = 1
+
+      // applying succeeds
       const applicationResult = await service.applyForLecture(lectureId, userId)
       expect(applicationResult.userId).toBe(userId)
+      // ok!
       expect(applicationResult.applied).toBe(true)
     })
     it('A user should not be able to apply twice or more for the lecture', async () => {
@@ -151,6 +154,9 @@ describe('신청 API', () => {
         await service.applyForLecture(lectureId, userId)
       }
 
+      /**
+       * 31'th applicant 😭
+       */
       const userId = 31
       expect(service.applyForLecture(lectureId, userId)).rejects.toThrow(
         'Limit Exceeded',
@@ -168,6 +174,8 @@ describe('신청 API', () => {
       const requests = users.map(userId =>
         service.applyForLecture(lectureId, userId),
       )
+
+      // race! 🚗
       await Promise.allSettled(requests)
 
       // If the sequence is guaranteed, the reservations should be in ascending order of userId.
@@ -200,12 +208,14 @@ describe('신청 API', () => {
     it('A user should read `applied === true` if the application succeeds', async () => {
       const lectureId = 1
       const userId = 1
+      // applying succeeds
       await service.applyForLecture(lectureId, userId)
 
       const applicationResult = await service.readOneApplication(
         lectureId,
         userId,
       )
+      // ok!
       expect(applicationResult.applied).toBe(true)
     })
     it('A user should read `applied === false` if the application fails', async () => {
@@ -220,6 +230,8 @@ describe('신청 API', () => {
         lectureId,
         userId,
       )
+
+      // no applied!
       expect(applicationResult.applied).toBe(false)
     })
   })
