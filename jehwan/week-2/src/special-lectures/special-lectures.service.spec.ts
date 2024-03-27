@@ -1,48 +1,87 @@
 import { ISpecialLecturesRepository } from './special-lectures.repository.interface'
-import { SpecialLectureApplicationResult } from './special-lectures.model'
 import { SpecialLecturesService } from './special-lectures.service'
 import { randomInt } from 'node:crypto'
 import { Mutex } from 'async-mutex'
+import { Application, SpecialLectureCount } from './special-lectures.model'
 
 function createRepositoryStub(): ISpecialLecturesRepository {
-  const db = new Set<number>()
-  /**
-   * 유닛 테스트에서는 실제 DB 를 사용하지 않기 때문에, 락 제어에서 Mutex 를 사용하였습니다.
-   */
+  const applicationTable = new Map<string, Application>()
+  const countTable = new Map<number, SpecialLectureCount>()
   const mutex = new Mutex()
 
   return {
-    pushApplicantIntoLecture(userId: number): Promise<void> {
+    pushApplicantIntoLecture(lectureId: number, userId: number): Promise<void> {
       return new Promise(res => {
         setTimeout(() => {
-          db.add(userId)
+          /**
+           * assuming that lecture already created in the stub
+           */
+          applicationTable.set(`${lectureId}:${userId}`, {
+            lectureId,
+            userId,
+            applied: true,
+            timestamp: new Date(),
+          })
+          countTable.set(lectureId, {
+            ...countTable.get(lectureId),
+            count: countTable.get(lectureId).count + 1,
+          })
           res()
         }, randomInt(50))
       })
     },
     readResultOfApplicant(
+      lectureId: number,
       userId: number,
-    ): Promise<SpecialLectureApplicationResult> {
+    ): Promise<Application> {
       return new Promise(res => {
         setTimeout(() => {
-          res({
+          /**
+           * assuming that lecture already created in the stub
+           */
+          if (!applicationTable.has(`${lectureId}:${userId}`)) {
+            return res({
+              lectureId,
+              userId,
+              applied: false,
+              timestamp: null,
+            })
+          }
+
+          return res({
+            lectureId,
             userId,
-            applied: db.has(userId),
+            applied: applicationTable.get(`${lectureId}:${userId}`).applied,
+            timestamp: applicationTable.get(`${lectureId}:${userId}`).timestamp,
           })
         }, randomInt(50))
       })
     },
-    count(): Promise<number> {
+    count(lectureId: number): Promise<SpecialLectureCount> {
       return new Promise(res => {
         setTimeout(() => {
-          res(db.size)
+          /**
+           * assuming that lecture already created in the stub
+           */
+          if (!countTable.has(lectureId)) {
+            countTable.set(lectureId, {
+              lectureId,
+              maximum: 30,
+              count: 0,
+            })
+          }
+
+          res({
+            ...countTable.get(lectureId),
+            count: countTable.get(lectureId).count ?? 0,
+          })
         }, randomInt(50))
       })
     },
-    applicants(): Promise<number[]> {
+    applicants(): Promise<Application[]> {
       return new Promise(res => {
         setTimeout(() => {
-          res([...db])
+          res([...applicationTable.values()])
         }, randomInt(50))
       })
     },
@@ -70,42 +109,49 @@ describe('SpecialLecturesService', () => {
     })
 
     it('A user should apply for the lecture', async () => {
+      const lectureId = 1
       const userId = 1
-      const applicationResult = await service.apply(userId)
+      const applicationResult = await service.apply(lectureId, userId)
       expect(applicationResult.userId).toBe(userId)
       expect(applicationResult.applied).toBe(true)
     })
     it('A user should not be able to apply twice or more for the lecture', async () => {
+      const lectureId = 1
       const userId = 1
-      const applicationResult = await service.apply(userId)
+      const applicationResult = await service.apply(lectureId, userId)
 
       // the first request is ok
       expect(applicationResult.applied).toBe(true)
 
       // the second request is not ok.
-      expect(service.apply(userId)).rejects.toThrow('Already Applied')
+      expect(service.apply(lectureId, userId)).rejects.toThrow(
+        'Already Applied',
+      )
     })
     it('A user should not be able to apply if there are already 30 applications', async () => {
-      for (let i = 1; i <= 30; i++) {
-        await service.apply(i)
+      const lectureId = 1
+      for (let userId = 1; userId <= 30; userId++) {
+        await service.apply(lectureId, userId)
       }
 
       const userId = 31
-      expect(service.apply(userId)).rejects.toThrow('Limit Exceeded')
+      expect(service.apply(lectureId, userId)).rejects.toThrow('Limit Exceeded')
     }, 15000)
     /**
      * 동시성 테스트
      */
     it('Applications should be processed sequentially even with concurrent requests', async () => {
+      const lectureId = 1
       // Create users in ascending order
       const users = Array.from({ length: 30 }, (_, i) => i)
 
       // Sent requests in ascending order of userId.
-      const requests = users.map(userId => service.apply(userId))
+      const requests = users.map(userId => service.apply(lectureId, userId))
       await Promise.allSettled(requests)
 
       // If the sequence is guaranteed, the reservations should be in ascending order of userId.
-      expect(await stub.applicants()).toEqual(users)
+      const results = await stub.applicants(lectureId)
+      expect(results.map(r => r.userId)).toEqual(users)
     })
   })
 
@@ -125,16 +171,22 @@ describe('SpecialLecturesService', () => {
     })
 
     it('A user should read `applied === true` if the application succeeds', async () => {
-      await service.apply(1)
+      const lectureId = 1
+      const userId = 1
+      await service.apply(lectureId, userId)
 
-      const applicationResult = await service.read(1)
+      const applicationResult = await service.read(lectureId, userId)
       expect(applicationResult.applied).toBe(true)
     })
     it('A user should read `applied === false` if the application fails', async () => {
-      jest.spyOn(service, 'apply').mockRejectedValueOnce(new Error())
-      expect(service.apply(1)).rejects.toThrow(Error)
+      const lectureId = 1
+      const userId = 1
 
-      const applicationResult = await service.read(1)
+      // mock apply always returns Error
+      jest.spyOn(service, 'apply').mockRejectedValueOnce(new Error())
+      expect(service.apply(lectureId, userId)).rejects.toThrow(Error)
+
+      const applicationResult = await service.read(lectureId, userId)
       expect(applicationResult.applied).toBe(false)
     })
   })
