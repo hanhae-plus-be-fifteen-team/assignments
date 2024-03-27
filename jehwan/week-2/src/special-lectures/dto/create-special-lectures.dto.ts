@@ -1,4 +1,4 @@
-import { IsDate, IsString } from 'class-validator'
+import { IsDate, IsNumber, IsString } from 'class-validator'
 
 export class CreateSpecialLecturesDto {
   @IsString()
@@ -6,4 +6,7 @@ export class CreateSpecialLecturesDto {
 
   @IsDate()
   openingDate: Date
+
+  @IsNumber()
+  maximum: number
 }

@@ -45,17 +45,7 @@ export class SpecialLecturesController {
    */
   @Get(':lecture-id/applications')
   readAllApplications(@Param('lecture-id', ParseIntPipe) lectureId: number) {
-    throw new NotImplementedException()
-  }
-
-  /**
-   *
-   * @param lectureId lecture's id
-   * @returns lecture that matches with id
-   */
-  @Get(':lecture-id')
-  readOneLecture(@Param('lecture-id', ParseIntPipe) lectureId: number) {
-    throw new NotImplementedException()
+    return this.adapter.service.readAllApplications(lectureId)
   }
 
   /**
@@ -64,7 +54,7 @@ export class SpecialLecturesController {
    */
   @Get()
   readAllLectures() {
-    throw new NotImplementedException()
+    return this.adapter.service.readAllLectures()
   }
 
   /**
@@ -74,7 +64,7 @@ export class SpecialLecturesController {
    */
   @Post()
   createLecture(@Body(new ValidationPipe()) body: CreateSpecialLecturesDto) {
-    throw new NotImplementedException()
+    return this.adapter.service.createLecture(body)
   }
 
   /**
