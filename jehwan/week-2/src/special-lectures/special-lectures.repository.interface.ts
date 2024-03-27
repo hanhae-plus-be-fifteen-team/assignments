@@ -8,7 +8,6 @@ export interface ISpecialLecturesRepository {
    * @param lectureId lecture's id
    * @param userId  applicant's id for the lecture
    * @param session the session for Transaction
-   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    * @description
    * Internally, use the concept of [JS Set](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Set)
    * to maintain the order of applications while ensuring there are no duplicates.
@@ -25,7 +24,6 @@ export interface ISpecialLecturesRepository {
    * @param userId  applicant's id for the lecture
    * @param session the session for Transaction
    * @returns the result of the application
-   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
   readResultOfApplicant(
     lectureId: number,
@@ -38,7 +36,6 @@ export interface ISpecialLecturesRepository {
    * @param lectureId lecture's id
    * @param session the session for Transaction
    * @returns the number of applicants
-   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
   count(lectureId: number, session?: unknown): Promise<SpecialLectureCount>
 
@@ -47,7 +44,6 @@ export interface ISpecialLecturesRepository {
    * @param lectureId lecture's id
    * @param session the session for Transaction
    * @returns Array of Applications (ensuring the order)
-   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
   readAllApplications(
     lectureId: number,
