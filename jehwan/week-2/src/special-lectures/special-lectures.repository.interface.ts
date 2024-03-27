@@ -1,5 +1,8 @@
 import { Application } from './models/application.model'
-import { SpecialLectureCount } from './models/special-lectures.model'
+import {
+  SpecialLecture,
+  SpecialLectureCount,
+} from './models/special-lectures.model'
 import { CreateSpecialLecturesModel } from './models/create-special-lectures.model'
 
 export interface ISpecialLecturesRepository {
@@ -54,11 +57,23 @@ export interface ISpecialLecturesRepository {
    *
    * @param model CreateSpecialLecturesModel
    * @param session the session for Transaction
+   * @returns lecture's id that created
    */
   createLecture(
     model: CreateSpecialLecturesModel,
     session?: unknown,
-  ): Promise<void>
+  ): Promise<number>
+
+  /**
+   *
+   * @param lectureId lecture's id
+   * @param session the session for Transaction
+   * @returns SpecialLecture or null
+   */
+  readOneLecture(
+    lectureId: number,
+    session?: unknown,
+  ): Promise<SpecialLecture | null>
 
   /**
    *

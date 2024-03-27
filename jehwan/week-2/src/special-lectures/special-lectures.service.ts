@@ -78,6 +78,16 @@ export class SpecialLecturesService {
   async createLecture(
     createModel: CreateSpecialLecturesModel,
   ): Promise<SpecialLecture> {
-    return
+    return this.specialLectureServiceRepository.withLock(async session => {
+      const insertedId =
+        await this.specialLectureServiceRepository.createLecture(
+          createModel,
+          session,
+        )
+      return await this.specialLectureServiceRepository.readOneLecture(
+        insertedId,
+        session,
+      )
+    })
   }
 }
