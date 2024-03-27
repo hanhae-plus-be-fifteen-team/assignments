@@ -5,7 +5,11 @@ import { Mutex } from 'async-mutex'
 import { SpecialLectureCountEntity } from './entities/special-lectures.entity'
 import { ApplicationEntity } from './entities/application.entity'
 import { Application } from './models/application.model'
-import { SpecialLectureCount } from './models/special-lectures.model'
+import {
+  SpecialLecture,
+  SpecialLectureCount,
+} from './models/special-lectures.model'
+import { CreateSpecialLecturesModel } from './models/create-special-lectures.model'
 
 export class SpecialLecturesRepositoryImpl
   implements ISpecialLecturesRepository
@@ -23,6 +27,7 @@ export class SpecialLecturesRepositoryImpl
    * @param lectureId lecture's id
    * @param userId  applicant's id for the lecture
    * @param session the session for Transaction
+   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
   async pushApplicantIntoLecture(
     lectureId: number,
@@ -43,6 +48,7 @@ export class SpecialLecturesRepositoryImpl
    * @param userId  applicant's id for the lecture
    * @param session the session for Transaction
    * @returns Business Domain Model (SpecialLectureApplicationResult)
+   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
   async readResultOfApplicant(
     lectureId: number,
@@ -69,6 +75,7 @@ export class SpecialLecturesRepositoryImpl
    * @param lectureId lecture's id
    * @param session the session for Transaction
    * @returns count for the lecture
+   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
   async count(
     lectureId: number,
@@ -88,7 +95,13 @@ export class SpecialLecturesRepositoryImpl
     }
   }
 
-  // @todo implement
+  /**
+   *
+   * @param lectureId lecture's id
+   * @param session the session for Transaction
+   * @returns Array of Applications (ensuring the order)
+   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
+   */
   readAllApplications(
     lectureId: number,
     session?: pgPromise.ITask<unknown>,
@@ -114,5 +127,15 @@ export class SpecialLecturesRepositoryImpl
     } finally {
       release()
     }
+  }
+
+  /**
+   *
+   * @param model CreateSpecialLecturesModel
+   * @returns SpecialLecture
+   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
+   */
+  createLecture(model: CreateSpecialLecturesModel): Promise<SpecialLecture> {
+    throw new Error('Method not implemented.')
   }
 }
