@@ -29,10 +29,10 @@ export class SpecialLecturesController {
    * @param userId  user's id for the lecture
    * @returns user's application result
    */
-  @Get(':lecture-id/applications/:user-id')
+  @Get(':lecture_id/applications/:user_id')
   async readOneApplication(
-    @Param('lecture-id', ParseIntPipe) lectureId: number,
-    @Param('user-id', ParseIntPipe) userId: number,
+    @Param('lecture_id') lectureId: string,
+    @Param('user_id') userId: string,
   ) {
     try {
       return await this.adapter.service.readOneApplication(lectureId, userId)
@@ -53,10 +53,8 @@ export class SpecialLecturesController {
    * @param lectureId lecture's id
    * @returns all applications
    */
-  @Get(':lecture-id/applications')
-  async readAllApplications(
-    @Param('lecture-id', ParseIntPipe) lectureId: number,
-  ) {
+  @Get(':lecture_id/applications')
+  async readAllApplications(@Param('lecture_id') lectureId: string) {
     try {
       return await this.adapter.service.readAllApplications(lectureId)
     } catch (e) {
@@ -97,10 +95,10 @@ export class SpecialLecturesController {
    * @returns user's application result
    * @description Make the user into an applied status.
    */
-  @Patch(':lecture-id/applications/:user-id')
+  @Patch(':lecture_id/applications/:user_id')
   async applyForLecture(
-    @Param('lecture-id', ParseIntPipe) lectureId: number,
-    @Param('user-id', ParseIntPipe) userId: number,
+    @Param('lecture_id') lectureId: string,
+    @Param('user_id') userId: string,
   ) {
     try {
       return await this.adapter.service.applyForLecture(lectureId, userId)

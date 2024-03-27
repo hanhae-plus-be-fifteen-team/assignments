@@ -18,7 +18,7 @@ export class UsersRepositoryImpl implements IUsersRepository {
     ])
 
     const userEntity = await this.pg.one<UserEntity>(
-      'SELECT * FROM users LIMIT 1',
+      'SELECT * FROM users ORDER BY created_at DESC LIMIT 1',
     )
 
     return {

@@ -38,7 +38,7 @@ export class SpecialLecturesService {
       }
 
       const prevResult =
-        await this.specialLectureServiceRepository.readResultOfApplicant(
+        await this.specialLectureServiceRepository.readOneApplication(
           lectureId,
           applicantId,
           session,
@@ -48,13 +48,13 @@ export class SpecialLecturesService {
         throw new Error('Already Applied')
       }
 
-      await this.specialLectureServiceRepository.pushApplicantIntoLecture(
+      await this.specialLectureServiceRepository.createApplication(
         lectureId,
         applicantId,
         session,
       )
 
-      return this.specialLectureServiceRepository.readResultOfApplicant(
+      return this.specialLectureServiceRepository.readOneApplication(
         lectureId,
         applicantId,
         session,
@@ -80,7 +80,7 @@ export class SpecialLecturesService {
       throw new Error('Lecture Does Not Exist')
     }
 
-    return await this.specialLectureServiceRepository.readResultOfApplicant(
+    return await this.specialLectureServiceRepository.readOneApplication(
       lectureId,
       applicantId,
     )

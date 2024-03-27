@@ -11,11 +11,8 @@ export interface ISpecialLecturesRepository {
    * @param lectureId lecture's id
    * @param userId  applicant's id for the lecture
    * @param session the session for Transaction
-   * @description
-   * Internally, use the concept of [JS Set](https://developer.mozilla.org/ko/docs/Web/JavaScript/Reference/Global_Objects/Set)
-   * to maintain the order of applications while ensuring there are no duplicates.
    */
-  pushApplicantIntoLecture(
+  createApplication(
     lectureId: string,
     userId: string,
     session?: unknown,
@@ -28,7 +25,7 @@ export interface ISpecialLecturesRepository {
    * @param session the session for Transaction
    * @returns the result of the application
    */
-  readResultOfApplicant(
+  readOneApplication(
     lectureId: string,
     userId: string,
     session?: unknown,

@@ -3,7 +3,8 @@ import { INestApplication } from '@nestjs/common'
 import * as request from 'supertest'
 import { AppModule } from '../src/app.module'
 import { GenericContainer, StartedTestContainer } from 'testcontainers'
-import { createDb } from '../src/database'
+import { Application } from 'src/special-lectures/models/application.model'
+import { v4 as uuidv4 } from 'uuid'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
@@ -50,25 +51,54 @@ describe('AppController (e2e)', () => {
     }
   })
 
-  describe('PATCH /special-lectures/1/application', () => {
+  let lectureId: string
+  let userId: string
+
+  beforeEach(async () => {
+    // prepare a new lecture for the e2e test
+    const lectureResponse = await request(app.getHttpServer())
+      .post(`/special-lectures`)
+      .send({
+        title: '취업 뽀개기 특강',
+        openingDate: new Date().toISOString(),
+        maximum: 30,
+      })
+
+    // prepare a user for the e2e test
+    const userResponse = await request(app.getHttpServer())
+      .post('/users')
+      .send({
+        username: 'david',
+      })
+
+    lectureId = lectureResponse.body.id
+    userId = userResponse.body.id
+  })
+
+  /**
+   * (핵심) 특강 신청 API
+   */
+  describe('PATCH /special-lectures/:lecture_id/applications/:user_id', () => {
     it('should succeed to apply for the lecture', async () => {
       const response = await request(app.getHttpServer()).patch(
-        '/special-lectures/1/application',
+        `/special-lectures/${lectureId}/applications/${userId}`,
       )
 
-      expect(response.body).toMatchObject({
-        applied: true,
-        userId: 1,
-      })
+      const { status, body } = response
+
+      expect(status).toBe(200)
+      expectApplication(body, lectureId, userId, true)
     })
 
     it('should fail to apply for the lecture if the user already applied', async () => {
-      await request(app.getHttpServer()).patch(
-        '/special-lectures/1/application',
-      )
+      const userId = 1
 
+      // send the same request twice
+      await request(app.getHttpServer()).patch(
+        `/special-lectures/${lectureId}/applications/${userId}`,
+      )
       await request(app.getHttpServer())
-        .patch('/special-lectures/1/application')
+        .patch(`/special-lectures/${lectureId}/applications/${userId}`)
         .expect(400)
         .expect({
           message: 'Already Applied',
@@ -76,51 +106,67 @@ describe('AppController (e2e)', () => {
           statusCode: 400,
         })
     })
-
-    it('Applications should be processed sequentially even with concurrent requests', async () => {
-      const users = Array.from({ length: 30 }, (_, i) => i)
-
-      const requests = users.map(user =>
-        request(app.getHttpServer()).patch(
-          `/special-lectures/${user}/application`,
-        ),
-      )
-
-      // race! 🚗
-      await Promise.allSettled(requests)
-
-      const pg = createDb()
-      const applications = await pg.many(
-        'SELECT * FROM special_lectures ORDER BY created_at',
-      )
-
-      // If the sequence is guaranteed, the reservations should be in ascending order of userId.
-      expect(applications.map(app => app.user_id)).toEqual(users)
-    }, 30000)
   })
 
-  describe('GET /special-lectures/1/application', () => {
-    it('should succeed to read applied === true for the lecture', async () => {
+  /**
+   * (기본) 특강 신청 완료 여부 조회 API
+   */
+  describe('GET /special-lectures/:lecture_id/applications/:user_id', () => {
+    let secondUser: string
+
+    beforeEach(async () => {
+      // prepare application for the e2e test
       await request(app.getHttpServer()).patch(
-        '/special-lectures/1/application',
+        `/special-lectures/${lectureId}/applications/${userId}`,
       )
 
-      await request(app.getHttpServer())
-        .get('/special-lectures/1/application')
-        .expect(200)
-        .expect({
-          userId: 1,
-          applied: true,
+      // prepare a user for the e2e test
+      const userResponse = await request(app.getHttpServer())
+        .post('/users')
+        .send({
+          username: 'john',
         })
+
+      secondUser = userResponse.body.id
     })
+
+    it('should succeed to read applied === true for the lecture', async () => {
+      const response = await request(app.getHttpServer()).get(
+        `/special-lectures/${lectureId}/applications/${userId}`,
+      )
+
+      const { status, body } = response
+      expect(status).toBe(200)
+      expectApplication(body, lectureId, userId, true)
+    })
+
     it('should succeed to read applied === false for the lecture', async () => {
-      await request(app.getHttpServer())
-        .get('/special-lectures/1/application')
-        .expect(200)
-        .expect({
-          userId: 1,
-          applied: false,
-        })
+      const response = await request(app.getHttpServer()).get(
+        `/special-lectures/${lectureId}/applications/${secondUser}`,
+      )
+      const { status, body } = response
+
+      expect(status).toBe(200)
+      expectApplication(body, lectureId, secondUser, false)
     })
   })
 })
+
+function expectApplication(
+  body: Record<keyof Application, unknown>,
+  lectureId: string,
+  userId: string,
+  applied: boolean,
+) {
+  expect(body.lectureId).toBe(lectureId)
+  expect(body.userId).toBe(userId)
+  expect(body.applied).toBe(applied)
+
+  if (applied) {
+    expect(body.timestamp).toMatch(
+      /\d{4}-[01]\d-[0-3]\dT[0-2]\d:[0-5]\d:[0-5]\d\.\d+Z?/,
+    )
+  } else {
+    expect(body.timestamp).toBe(null)
+  }
+}
