@@ -42,9 +42,12 @@ export interface ISpecialLecturesRepository {
    *
    * @param lectureId lecture's id
    * @param session the session for Transaction
-   * @returns applicants (ensuring the order)
+   * @returns Array of Applications (ensuring the order)
    */
-  applicants(lectureId: number, session?: unknown): Promise<Application[]>
+  readAllApplications(
+    lectureId: number,
+    session?: unknown,
+  ): Promise<Application[]>
 
   /**
    *
