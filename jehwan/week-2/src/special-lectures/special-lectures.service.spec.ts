@@ -3,7 +3,11 @@ import { SpecialLecturesService } from './special-lectures.service'
 import { randomInt } from 'node:crypto'
 import { Mutex } from 'async-mutex'
 import { Application } from './models/application.model'
-import { SpecialLectureCount } from './models/special-lectures.model'
+import {
+  SpecialLecture,
+  SpecialLectureCount,
+} from './models/special-lectures.model'
+import { CreateSpecialLecturesModel } from './models/create-special-lectures.model'
 
 function createRepositoryStub(): ISpecialLecturesRepository {
   const applicationTable = new Map<string, Application>()
@@ -85,6 +89,9 @@ function createRepositoryStub(): ISpecialLecturesRepository {
           res([...applicationTable.values()])
         }, randomInt(50))
       })
+    },
+    createLecture(model: CreateSpecialLecturesModel): Promise<SpecialLecture> {
+      return Promise.resolve(undefined)
     },
     withLock<T>(atom: (...args: unknown[]) => Promise<T>): Promise<T> {
       // Use the mutex to lock the section
