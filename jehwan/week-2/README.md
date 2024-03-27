@@ -15,7 +15,7 @@ Persistence 를 위해 `RepositoryInterface`를 작성했습니다. 비즈니스
 
 # ERD
 
-![ERD](./assets/ERD.jpg)
+![ERD](./assets/ERD.png)
 
 # 서버 실행
 
