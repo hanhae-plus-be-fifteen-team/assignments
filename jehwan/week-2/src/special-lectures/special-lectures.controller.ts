@@ -19,6 +19,12 @@ export class SpecialLecturesController {
    */
   constructor(private adapter: SpecialLecturesServiceAdapter) {}
 
+  /**
+   *
+   * @param lectureId lecture's id
+   * @param userId  user's id for the lecture
+   * @returns user's application result
+   */
   @Get(':lecture-id/applications/:user-id')
   readApplication(
     @Param('lecture-id', ParseIntPipe) lectureId: number,
@@ -27,6 +33,13 @@ export class SpecialLecturesController {
     return this.adapter.service.read(lectureId, userId)
   }
 
+  /**
+   *
+   * @param lectureId lecture's id
+   * @param userId  user's id for the lecture
+   * @returns user's application result
+   * @description Make the user into an applied status.
+   */
   @Patch(':lecture-id/applications/:user-id')
   async applyForLecture(
     @Param('lecture-id', ParseIntPipe) lectureId: number,
