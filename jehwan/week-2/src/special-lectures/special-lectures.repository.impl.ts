@@ -33,6 +33,11 @@ export class SpecialLecturesRepositoryImpl
     this.mutex = new Mutex()
   }
 
+  /**
+   *
+   * @param userId  applicant's id for the lecture
+   * @param session the session for Transaction
+   */
   async pushApplicantIntoLecture(
     userId: number,
     session?: pgPromise.ITask<unknown>,
@@ -45,6 +50,12 @@ export class SpecialLecturesRepositoryImpl
     )
   }
 
+  /**
+   *
+   * @param userId  applicant's id for the lecture
+   * @param session the session for Transaction
+   * @returns Business Domain Model (SpecialLectureApplicationResult)
+   */
   async readResultOfApplicant(
     userId: number,
     session?: pgPromise.ITask<unknown>,
@@ -69,6 +80,11 @@ export class SpecialLecturesRepositoryImpl
     }
   }
 
+  /**
+   *
+   * @param session the session for Transaction
+   * @returns count for the lecture
+   */
   async count(session?: pgPromise.ITask<unknown>): Promise<number> {
     const conn = session ?? this.pg
 
