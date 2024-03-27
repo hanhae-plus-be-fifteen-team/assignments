@@ -1,4 +1,4 @@
-import { SpecialLectureApplicationResult } from './special-lectures.model'
+import { Application } from './special-lectures.model'
 import { ISpecialLecturesRepository } from './special-lectures.repository.interface'
 
 export class SpecialLecturesService {
@@ -7,20 +7,24 @@ export class SpecialLecturesService {
   ) {}
 
   /**
-   *
+   * @param lectureId lecture's id
    * @param applicantId - applicant's id for the lecture
    * @returns the result of the application
    */
-  async apply(applicantId: number): Promise<SpecialLectureApplicationResult> {
+  async apply(lectureId: number, applicantId: number): Promise<Application> {
     return this.specialLectureServiceRepository.withLock(async session => {
-      const count = await this.specialLectureServiceRepository.count(session)
+      const countResult = await this.specialLectureServiceRepository.count(
+        lectureId,
+        session,
+      )
 
-      if (count >= 30) {
+      if (countResult.count >= countResult.maximum) {
         throw new Error('Limit Exceeded')
       }
 
       const prevResult =
         await this.specialLectureServiceRepository.readResultOfApplicant(
+          lectureId,
           applicantId,
           session,
         )
@@ -30,11 +34,13 @@ export class SpecialLecturesService {
       }
 
       await this.specialLectureServiceRepository.pushApplicantIntoLecture(
+        lectureId,
         applicantId,
         session,
       )
 
       return this.specialLectureServiceRepository.readResultOfApplicant(
+        lectureId,
         applicantId,
         session,
       )
@@ -43,22 +49,14 @@ export class SpecialLecturesService {
 
   /**
    *
+   * @param lectureId lecture's id
    * @param applicantId - applicant's id for the lecture
    * @returns the result of the application
    */
-  async read(applicantId: number): Promise<SpecialLectureApplicationResult> {
-    try {
-      return await this.specialLectureServiceRepository.readResultOfApplicant(
-        applicantId,
-      )
-    } catch (e) {
-      if (e.message === 'Not Applied') {
-        return {
-          userId: applicantId,
-          applied: false,
-        }
-      }
-      throw e
-    }
+  async read(lectureId: number, applicantId: number): Promise<Application> {
+    return await this.specialLectureServiceRepository.readResultOfApplicant(
+      lectureId,
+      applicantId,
+    )
   }
 }
