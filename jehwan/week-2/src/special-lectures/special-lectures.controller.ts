@@ -97,6 +97,8 @@ export class SpecialLecturesController {
           throw new BadRequestException('Limit Exceeded (maximum 30)')
         case 'Already Applied':
           throw new BadRequestException('Already Applied')
+        case 'Lecture Does Not Exist':
+          throw new BadRequestException('Lecture Does not Exist')
         default: // fallback
           console.log(e)
           throw new InternalServerErrorException('Internal Server Exception', {
