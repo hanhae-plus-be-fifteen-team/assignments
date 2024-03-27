@@ -2,8 +2,8 @@ import { Application } from './models/application.model'
 import {
   SpecialLecture,
   SpecialLectureCount,
-} from './models/special-lectures.model'
-import { CreateSpecialLecturesModel } from './models/create-special-lectures.model'
+} from './models/special-lecture.model'
+import { CreateSpecialLectureModel } from './models/create-special-lecture.model'
 
 export interface ISpecialLecturesRepository {
   /**
@@ -16,8 +16,8 @@ export interface ISpecialLecturesRepository {
    * to maintain the order of applications while ensuring there are no duplicates.
    */
   pushApplicantIntoLecture(
-    lectureId: number,
-    userId: number,
+    lectureId: string,
+    userId: string,
     session?: unknown,
   ): Promise<void>
 
@@ -29,8 +29,8 @@ export interface ISpecialLecturesRepository {
    * @returns the result of the application
    */
   readResultOfApplicant(
-    lectureId: number,
-    userId: number,
+    lectureId: string,
+    userId: string,
     session?: unknown,
   ): Promise<Application>
 
@@ -40,7 +40,7 @@ export interface ISpecialLecturesRepository {
    * @param session the session for Transaction
    * @returns the number of applicants
    */
-  count(lectureId: number, session?: unknown): Promise<SpecialLectureCount>
+  count(lectureId: string, session?: unknown): Promise<SpecialLectureCount>
 
   /**
    *
@@ -49,20 +49,20 @@ export interface ISpecialLecturesRepository {
    * @returns Array of Applications (ensuring the order)
    */
   readAllApplications(
-    lectureId: number,
+    lectureId: string,
     session?: unknown,
   ): Promise<Application[]>
 
   /**
    *
-   * @param model CreateSpecialLecturesModel
+   * @param model CreateSpecialLectureModel
    * @param session the session for Transaction
    * @returns lecture's id that created
    */
   createLecture(
-    model: CreateSpecialLecturesModel,
+    model: CreateSpecialLectureModel,
     session?: unknown,
-  ): Promise<number>
+  ): Promise<SpecialLecture>
 
   /**
    *
@@ -71,7 +71,7 @@ export interface ISpecialLecturesRepository {
    * @returns SpecialLecture or null
    */
   readOneLecture(
-    lectureId: number,
+    lectureId: string,
     session?: unknown,
   ): Promise<SpecialLecture | null>
 

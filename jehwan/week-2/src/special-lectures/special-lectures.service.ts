@@ -1,7 +1,7 @@
 import { ISpecialLecturesRepository } from './special-lectures.repository.interface'
 import { Application } from './models/application.model'
-import { CreateSpecialLecturesModel } from './models/create-special-lectures.model'
-import { SpecialLecture } from './models/special-lectures.model'
+import { CreateSpecialLectureModel } from './models/create-special-lecture.model'
+import { SpecialLecture } from './models/special-lecture.model'
 
 export class SpecialLecturesService {
   constructor(
@@ -17,8 +17,8 @@ export class SpecialLecturesService {
    * @throws Error 'Lecture Does Not Exist' when there is no matched lecture
    */
   async applyForLecture(
-    lectureId: number,
-    applicantId: number,
+    lectureId: string,
+    applicantId: string,
   ): Promise<Application> {
     return this.specialLectureServiceRepository.withLock(async session => {
       const lecture =
@@ -70,8 +70,8 @@ export class SpecialLecturesService {
    * @throws Error 'Lecture Does Not Exist' when there is no matched lecture
    **/
   async readOneApplication(
-    lectureId: number,
-    applicantId: number,
+    lectureId: string,
+    applicantId: string,
   ): Promise<Application> {
     const lecture =
       await this.specialLectureServiceRepository.readOneLecture(lectureId)
@@ -92,19 +92,9 @@ export class SpecialLecturesService {
    * @returns SpecialLecture that created
    */
   async createLecture(
-    createModel: CreateSpecialLecturesModel,
+    createModel: CreateSpecialLectureModel,
   ): Promise<SpecialLecture> {
-    return this.specialLectureServiceRepository.withLock(async session => {
-      const insertedId =
-        await this.specialLectureServiceRepository.createLecture(
-          createModel,
-          session,
-        )
-      return await this.specialLectureServiceRepository.readOneLecture(
-        insertedId,
-        session,
-      )
-    })
+    return this.specialLectureServiceRepository.createLecture(createModel)
   }
 
   /**
@@ -113,7 +103,7 @@ export class SpecialLecturesService {
    * @returns all applications for the lecture
    * @throws Error 'Lecture Does Not Exist' when there is no matched lecture
    **/
-  async readAllApplications(lectureId: number): Promise<Application[]> {
+  async readAllApplications(lectureId: string): Promise<Application[]> {
     const lecture =
       await this.specialLectureServiceRepository.readOneLecture(lectureId)
 

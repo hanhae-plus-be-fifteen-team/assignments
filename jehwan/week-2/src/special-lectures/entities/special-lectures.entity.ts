@@ -3,7 +3,7 @@
  * [ PG ] entity for the special_lectures table
  */
 export interface SpecialLectureEntity {
-  id: number
+  id: string
   title: string
   opening_date: Date
 }
@@ -14,7 +14,8 @@ export interface SpecialLectureEntity {
  * 1:1 relations with SpecialLectureEntity
  */
 export interface SpecialLectureCountEntity {
-  lecture_id: number
+  id: string
+  lecture_id: string
   maximum: number
   count: number
 }

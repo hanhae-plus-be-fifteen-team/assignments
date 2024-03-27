@@ -1,4 +1,4 @@
-import { SpecialLecture } from './special-lectures.model'
+import { SpecialLecture } from './special-lecture.model'
 
 /**
  * @description
@@ -6,9 +6,13 @@ import { SpecialLecture } from './special-lectures.model'
  */
 export interface Application {
   /**
+   * @description UUID
+   */
+  id: string
+  /**
    * @description reference for the lecture
    */
-  lectureId: number
+  lectureId: string
   /**
    * @description associated lecture when a lookup is requested
    */
@@ -20,7 +24,7 @@ export interface Application {
   /**
    * @description reference for the user
    */
-  userId: number
+  userId: string
   /**
    * @description
    * registration timestamp for the lecture
