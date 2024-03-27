@@ -1,5 +1,7 @@
 import { ISpecialLecturesRepository } from './special-lectures.repository.interface'
 import { Application } from './models/application.model'
+import { CreateSpecialLecturesModel } from './models/create-special-lectures.model'
+import { SpecialLecture } from './models/special-lectures.model'
 
 export class SpecialLecturesService {
   constructor(
@@ -66,5 +68,16 @@ export class SpecialLecturesService {
       lectureId,
       applicantId,
     )
+  }
+
+  /**
+   *
+   * @param createModel
+   * @returns SpecialLecture that created
+   */
+  async createLecture(
+    createModel: CreateSpecialLecturesModel,
+  ): Promise<SpecialLecture> {
+    return
   }
 }
