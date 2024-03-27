@@ -89,7 +89,7 @@ export class SpecialLecturesRepositoryImpl
   }
 
   // @todo implement
-  applicants(
+  readAllApplications(
     lectureId: number,
     session?: pgPromise.ITask<unknown>,
   ): Promise<Application[]> {

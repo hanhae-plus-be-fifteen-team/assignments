@@ -79,7 +79,7 @@ function createRepositoryStub(): ISpecialLecturesRepository {
         }, randomInt(50))
       })
     },
-    applicants(): Promise<Application[]> {
+    readAllApplications(): Promise<Application[]> {
       return new Promise(res => {
         setTimeout(() => {
           res([...applicationTable.values()])
@@ -152,7 +152,7 @@ describe('신청 API', () => {
       await Promise.allSettled(requests)
 
       // If the sequence is guaranteed, the reservations should be in ascending order of userId.
-      const results = await stub.applicants(lectureId)
+      const results = await stub.readAllApplications(lectureId)
       expect(results.map(r => r.userId)).toEqual(users)
     })
   })
