@@ -1,4 +1,5 @@
-import { Application, SpecialLectureCount } from './special-lectures.model'
+import { Application } from './models/application.model'
+import { SpecialLectureCount } from './models/special-lectures.model'
 
 export interface ISpecialLecturesRepository {
   /**
