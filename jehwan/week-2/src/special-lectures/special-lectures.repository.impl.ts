@@ -33,7 +33,6 @@ export class SpecialLecturesRepositoryImpl
    * @param lectureId lecture's id
    * @param userId  applicant's id for the lecture
    * @param session the session for Transaction
-   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
   async pushApplicantIntoLecture(
     lectureId: number,
@@ -55,7 +54,6 @@ export class SpecialLecturesRepositoryImpl
    * @param userId  applicant's id for the lecture
    * @param session the session for Transaction
    * @returns Business Domain Model (SpecialLectureApplicationResult)
-   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
   async readResultOfApplicant(
     lectureId: number,
@@ -85,7 +83,6 @@ export class SpecialLecturesRepositoryImpl
    * @param lectureId lecture's id
    * @param session the session for Transaction
    * @returns count for the lecture
-   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
   async count(
     lectureId: number,
@@ -112,7 +109,6 @@ export class SpecialLecturesRepositoryImpl
    * @param lectureId lecture's id
    * @param session the session for Transaction
    * @returns Array of Applications (ensuring the order)
-   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
   async readAllApplications(
     lectureId: number,
@@ -163,7 +159,6 @@ export class SpecialLecturesRepositoryImpl
    * @param model CreateSpecialLecturesModel
    * @param session the session for Transaction
    * @returns SpecialLecture
-   * @throws Error 'LECTURE DOES NOT EXIST' when lecture does not match
    */
   async createLecture(
     model: CreateSpecialLecturesModel,

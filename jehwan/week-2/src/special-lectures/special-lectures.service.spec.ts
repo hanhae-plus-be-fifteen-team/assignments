@@ -18,10 +18,8 @@ function createRepositoryStub(): ISpecialLecturesRepository {
 
   return {
     pushApplicantIntoLecture(lectureId: number, userId: number): Promise<void> {
-      return new Promise((res, rej) => {
+      return new Promise(res => {
         setTimeout(() => {
-          if (!lectureTable.has(lectureId)) return rej('LECTURE DOES NOT EXIST')
-
           applicationTable.set(`${lectureId}:${userId}`, {
             lectureId,
             userId,
@@ -40,10 +38,8 @@ function createRepositoryStub(): ISpecialLecturesRepository {
       lectureId: number,
       userId: number,
     ): Promise<Application> {
-      return new Promise((res, rej) => {
+      return new Promise(res => {
         setTimeout(() => {
-          if (!lectureTable.has(lectureId)) return rej('LECTURE DOES NOT EXIST')
-
           const key = `${lectureId}:${userId}`
           const application = applicationTable.get(key)
 
@@ -57,10 +53,8 @@ function createRepositoryStub(): ISpecialLecturesRepository {
       })
     },
     count(lectureId: number): Promise<SpecialLectureCount> {
-      return new Promise((res, rej) => {
+      return new Promise(res => {
         setTimeout(() => {
-          if (!lectureTable.has(lectureId)) return rej('LECTURE DOES NOT EXIST')
-
           res({
             ...countTable.get(lectureId),
             count: countTable.get(lectureId).count ?? 0,
@@ -69,9 +63,7 @@ function createRepositoryStub(): ISpecialLecturesRepository {
       })
     },
     readAllApplications(lectureId: number): Promise<Application[]> {
-      return new Promise((res, rej) => {
-        if (!lectureTable.has(lectureId)) return rej('LECTURE DOES NOT EXIST')
-
+      return new Promise(res => {
         setTimeout(() => {
           res([...applicationTable.values()])
         }, randomInt(50))
