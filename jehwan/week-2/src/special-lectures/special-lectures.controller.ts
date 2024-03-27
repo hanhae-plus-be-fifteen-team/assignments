@@ -4,7 +4,6 @@ import {
   Controller,
   Get,
   InternalServerErrorException,
-  NotImplementedException,
   Param,
   ParseIntPipe,
   Patch,
@@ -31,11 +30,22 @@ export class SpecialLecturesController {
    * @returns user's application result
    */
   @Get(':lecture-id/applications/:user-id')
-  readOneApplication(
+  async readOneApplication(
     @Param('lecture-id', ParseIntPipe) lectureId: number,
     @Param('user-id', ParseIntPipe) userId: number,
   ) {
-    return this.adapter.service.readOneApplication(lectureId, userId)
+    try {
+      return await this.adapter.service.readOneApplication(lectureId, userId)
+    } catch (e) {
+      switch (e.message) {
+        case 'Lecture Does Not Exist':
+          throw new BadRequestException('Lecture Does not Exist')
+        default: // fallback
+          throw new InternalServerErrorException('Internal Server Exception', {
+            cause: e,
+          })
+      }
+    }
   }
 
   /**
@@ -44,8 +54,21 @@ export class SpecialLecturesController {
    * @returns all applications
    */
   @Get(':lecture-id/applications')
-  readAllApplications(@Param('lecture-id', ParseIntPipe) lectureId: number) {
-    return this.adapter.service.readAllApplications(lectureId)
+  async readAllApplications(
+    @Param('lecture-id', ParseIntPipe) lectureId: number,
+  ) {
+    try {
+      return await this.adapter.service.readAllApplications(lectureId)
+    } catch (e) {
+      switch (e.message) {
+        case 'Lecture Does Not Exist':
+          throw new BadRequestException('Lecture Does not Exist')
+        default: // fallback
+          throw new InternalServerErrorException('Internal Server Exception', {
+            cause: e,
+          })
+      }
+    }
   }
 
   /**
@@ -90,7 +113,6 @@ export class SpecialLecturesController {
         case 'Lecture Does Not Exist':
           throw new BadRequestException('Lecture Does not Exist')
         default: // fallback
-          console.log(e)
           throw new InternalServerErrorException('Internal Server Exception', {
             cause: e,
           })
