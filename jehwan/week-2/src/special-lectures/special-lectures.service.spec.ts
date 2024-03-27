@@ -114,6 +114,15 @@ describe('신청 API', () => {
        */
       stub = createRepositoryStub()
       service = new SpecialLecturesService(stub)
+
+      /**
+       * create a lecture stub for each test
+       */
+      await stub.createLecture({
+        title: '대기업 이직 일격필살',
+        openingDate: new Date(),
+        maximum: 30,
+      })
     })
 
     it('A user should apply for the lecture', async () => {
@@ -177,6 +186,15 @@ describe('신청 API', () => {
        */
       stub = createRepositoryStub()
       service = new SpecialLecturesService(stub)
+
+      /**
+       * create a lecture stub for each test
+       */
+      await stub.createLecture({
+        title: '대기업 면접 일격필살',
+        openingDate: new Date(),
+        maximum: 30,
+      })
     })
 
     it('A user should read `applied === true` if the application succeeds', async () => {
