@@ -4,7 +4,18 @@ import { createDb } from '../database'
 import pgPromise from 'pg-promise'
 import { Mutex } from 'async-mutex'
 
-export interface SpecialLectureEntity {
+/**
+ * @description
+ * Entity 를 DB Driver 에서 데이터를 다루는 형태라고 정의
+ * 따라서, context 를 pg-promise 로 한정하여 RepositoryImpl 에 정의
+ *
+ * RepositoryImpl -> [ Repository Interface ] <- Service 구조에서
+ * [ Repository Interface ] 에서 교환되는 데이터 형식은
+ * 도메인 모델인 special-lectures.model.ts 에 정의된 `SpecialLectureApplicationResult`
+ *
+ * .readResultOfApplicant() 메서드에서 [Entity -> Domain] 으로 변환해서 반환
+ */
+interface SpecialLectureEntity {
   id: number
   user_id: number
   applied: boolean
