@@ -77,7 +77,16 @@ export interface ISpecialLecturesRepository {
    * @param session the session for Transaction
    * @returns the number of applicants
    */
-  count(lectureId: string, session?: unknown): Promise<SpecialLectureCount>
+  readCount(lectureId: string, session?: unknown): Promise<SpecialLectureCount>
+
+  /**
+   *
+   * @param lectureId lecture's id
+   * @param session the session for Transaction
+   * @returns the number of applicants
+   * @description add count +1
+   */
+  addCount(lectureId: string, session?: unknown): Promise<SpecialLectureCount>
 
   /**
    *

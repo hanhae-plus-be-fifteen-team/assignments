@@ -4,6 +4,7 @@ import * as request from 'supertest'
 import { AppModule } from '../src/app.module'
 import { GenericContainer, StartedTestContainer } from 'testcontainers'
 import { Application } from 'src/special-lectures/models/application.model'
+import { SpecialLectureExceptionMessage } from '../src/special-lectures/models/special-lecture.excpetion.model'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
@@ -52,6 +53,7 @@ describe('AppController (e2e)', () => {
 
   let lectureId: string
   let userId: string
+  let others: string[]
 
   beforeEach(async () => {
     // prepare a new lecture for the e2e test
@@ -69,6 +71,14 @@ describe('AppController (e2e)', () => {
       .send({
         username: 'david',
       })
+
+    others = []
+    for (let i = 0; i < 30; i++) {
+      const other = await request(app.getHttpServer()).post(`/users`).send({
+        username: 'a',
+      })
+      others.push(other.body.id)
+    }
 
     lectureId = lectureResponse.body.id
     userId = userResponse.body.id
@@ -98,11 +108,33 @@ describe('AppController (e2e)', () => {
         .patch(`/special-lectures/${lectureId}/applications/${userId}`)
         .expect(400)
         .expect({
-          message: 'Already Applied',
+          message: SpecialLectureExceptionMessage.ALREADY_APPLIED,
           error: 'Bad Request',
           statusCode: 400,
         })
     })
+
+    it('A user should not be able to apply if there are already 30 applications', async () => {
+      /**
+       * apply for the lecture 30 times
+       */
+      for (const otherId of others) {
+        await request(app.getHttpServer()).patch(
+          `/special-lectures/${lectureId}/applications/${otherId}`,
+        )
+      }
+      /**
+       * 31'th applicant 😭
+       */
+      await request(app.getHttpServer())
+        .patch(`/special-lectures/${lectureId}/applications/${userId}`)
+        .expect(400)
+        .expect({
+          message: SpecialLectureExceptionMessage.LIMIT_EXCEEDED,
+          error: 'Bad Request',
+          statusCode: 400,
+        })
+    }, 30000)
   })
 
   /**

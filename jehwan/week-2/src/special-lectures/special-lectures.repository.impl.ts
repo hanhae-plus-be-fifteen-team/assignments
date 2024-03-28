@@ -85,7 +85,7 @@ export class SpecialLecturesRepositoryImpl
    * @param session the session for Transaction
    * @returns count for the lecture
    */
-  async count(
+  async readCount(
     lectureId: string,
     session?: pgPromise.ITask<unknown>,
   ): Promise<SpecialLectureCount> {
@@ -138,7 +138,7 @@ export class SpecialLecturesRepositoryImpl
    *
    * @todo Considering locks in a distributed cluster
    * @param atom A function that guarantees atomicity
-   * @returns Sequential execution is guaranteed using Node.js’ event loop.
+   * @returns the result of atom()
    */
   async withLock<T>(
     atom: (session?: pgPromise.ITask<unknown>) => Promise<T>,
@@ -170,7 +170,7 @@ export class SpecialLecturesRepositoryImpl
     const inserted = await conn.one<SpecialLecture>(
       `SELECT *
        FROM ${Table.SPECIAL_LECTURES}
-       ORDER BY id DESC
+       ORDER BY created_at DESC
        LIMIT 1`,
     )
 
@@ -227,5 +227,33 @@ export class SpecialLecturesRepositoryImpl
       title: entity.title,
       openingDate: entity.opening_date,
     }))
+  }
+
+  async addCount(
+    lectureId: string,
+    session?: pgPromise.ITask<unknown>,
+  ): Promise<SpecialLectureCount> {
+    const conn = session ?? this.pg
+
+    await conn.none(
+      `UPDATE ${Table.SPECIAL_LECTURE_COUNTS}
+       set count = count + 1
+       WHERE lecture_id = $1`,
+      [lectureId],
+    )
+
+    const countEntity = await conn.one<SpecialLectureCountEntity>(
+      `SELECT *
+       FROM ${Table.SPECIAL_LECTURE_COUNTS}
+       WHERE lecture_id = $1`,
+      [lectureId],
+    )
+
+    return {
+      id: countEntity.id,
+      lectureId: countEntity.lecture_id,
+      maximum: countEntity.maximum,
+      count: countEntity.count,
+    }
   }
 }
