@@ -53,6 +53,23 @@ Persistence 를 위해 `RepositoryInterface`를 작성했습니다. 비즈니스
 
 ![ERD](./assets/ERD.png)
 
+# API Documentation
+
+## Lecture (강의)
+
+- `GET /speical-lectures`: 강의 전체 조회
+- `POST /special-lectures`: 강의 생성
+
+## Application (신청)
+
+- `GET /speical-lectures/:lecture_id/applications`: 수강 전체 조회
+- `GET /special-lectures/:lecture_id/applications/:user_id`: 수강 단일 조회 (특정 유저)
+- `PATCH /special-lectures/:lecture_id/applications/:user_id`: 수강 신청
+
+## User (유저)
+- `GET /users/:id`: 유저 조회
+- `POST /users`: 유저 생성
+
 # E2E test
 
 - (핵심) 특강 신청 API
