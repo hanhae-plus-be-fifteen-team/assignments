@@ -105,6 +105,9 @@ export class SpecialLecturesController {
         throw this.handleSpecialLectureException(e)
       }
 
+      // unknown error
+      console.error(e)
+
       throw new InternalServerErrorException('Internal Server Exception', {
         cause: e,
       })

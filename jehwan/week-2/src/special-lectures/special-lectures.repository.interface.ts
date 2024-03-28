@@ -89,8 +89,12 @@ export interface ISpecialLecturesRepository {
   addCount(lectureId: string, session?: unknown): Promise<SpecialLectureCount>
 
   /**
-   *
+   * @param lectureId
+   * @param lectureId lock based on lectureId
    * @param atom A function that guarantees atomicity
    */
-  withLock<T>(atom: (session?: unknown) => Promise<T>): Promise<T>
+  withLock<T>(
+    lectureId: string,
+    atom: (session: unknown) => Promise<T>,
+  ): Promise<T>
 }

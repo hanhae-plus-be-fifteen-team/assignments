@@ -16,6 +16,7 @@ export function initMockRepo(): Record<
     readOneApplication: jest.fn(),
     readCount: jest.fn(),
     withLock: jest.fn(),
+    addCount: jest.fn(),
   }
 }
 
@@ -28,7 +29,7 @@ export function setNormalForApplyForLecture(
   mockRepo: ReturnType<typeof initMockRepo>,
 ) {
   mockRepo.readOneLecture.mockReturnValue({})
-  mockRepo.withLock.mockImplementation(atom => atom())
+  mockRepo.withLock.mockImplementation((_, atom) => atom())
   mockRepo.readCount.mockReturnValue({
     maximum: 30,
     count: 0,
@@ -51,7 +52,7 @@ export function setAbnormalAlreadyApplied(
   mockRepo: ReturnType<typeof initMockRepo>,
 ) {
   mockRepo.readOneLecture.mockReturnValue({})
-  mockRepo.withLock.mockImplementation(atom => atom())
+  mockRepo.withLock.mockImplementation((_, atom) => atom())
   mockRepo.readCount.mockReturnValue({
     maximum: 30,
     count: 0,
@@ -70,7 +71,7 @@ export function setAbnormalLimitExceeded(
   mockRepo: ReturnType<typeof initMockRepo>,
 ) {
   mockRepo.readOneLecture.mockReturnValue({})
-  mockRepo.withLock.mockImplementation(atom => atom())
+  mockRepo.withLock.mockImplementation((_, atom) => atom())
   mockRepo.readCount.mockReturnValue({
     maximum: 30,
     count: 31,

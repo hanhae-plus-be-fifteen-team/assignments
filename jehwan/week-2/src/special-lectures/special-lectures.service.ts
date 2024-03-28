@@ -25,60 +25,64 @@ export class SpecialLecturesService {
     lectureId: string,
     applicantId: string,
   ): Promise<Application> {
-    return this.specialLectureServiceRepository.withLock(async session => {
-      const lecture =
-        await this.specialLectureServiceRepository.readOneLecture(lectureId)
+    return this.specialLectureServiceRepository.withLock(
+      lectureId,
+      async session => {
+        const lecture =
+          await this.specialLectureServiceRepository.readOneLecture(lectureId)
 
-      if (!lecture) {
-        throw new SpecialLectureException(
-          SpecialLectureExceptionMessage.LECTURE_DOES_NOT_EXIST,
-        )
-      }
+        if (!lecture) {
+          throw new SpecialLectureException(
+            SpecialLectureExceptionMessage.LECTURE_DOES_NOT_EXIST,
+          )
+        }
 
-      if (new Date() < lecture.openingDate) {
-        throw new SpecialLectureException(
-          SpecialLectureExceptionMessage.NOT_OPEN_YET,
-        )
-      }
+        if (new Date() < lecture.openingDate) {
+          throw new SpecialLectureException(
+            SpecialLectureExceptionMessage.NOT_OPEN_YET,
+          )
+        }
 
-      const countResult = await this.specialLectureServiceRepository.readCount(
-        lectureId,
-        session,
-      )
+        const countResult =
+          await this.specialLectureServiceRepository.readCount(
+            lectureId,
+            session,
+          )
 
-      if (countResult.count >= countResult.maximum) {
-        throw new SpecialLectureException(
-          SpecialLectureExceptionMessage.LIMIT_EXCEEDED,
-        )
-      }
+        if (countResult.count >= countResult.maximum) {
+          throw new SpecialLectureException(
+            SpecialLectureExceptionMessage.LIMIT_EXCEEDED,
+          )
+        }
 
-      const prevResult =
-        await this.specialLectureServiceRepository.readOneApplication(
+        const prevResult =
+          await this.specialLectureServiceRepository.readOneApplication(
+            lectureId,
+            applicantId,
+            session,
+          )
+
+        if (prevResult.applied) {
+          throw new SpecialLectureException(
+            SpecialLectureExceptionMessage.ALREADY_APPLIED,
+          )
+        }
+
+        await this.specialLectureServiceRepository.createApplication(
           lectureId,
           applicantId,
           session,
         )
 
-      if (prevResult.applied) {
-        throw new SpecialLectureException(
-          SpecialLectureExceptionMessage.ALREADY_APPLIED,
+        await this.specialLectureServiceRepository.addCount(lectureId, session)
+
+        return this.specialLectureServiceRepository.readOneApplication(
+          lectureId,
+          applicantId,
+          session,
         )
-      }
-
-      await this.specialLectureServiceRepository.createApplication(
-        lectureId,
-        applicantId,
-        session,
-      )
-
-      await this.specialLectureServiceRepository.addCount(lectureId, session)
-
-      return this.specialLectureServiceRepository.readOneApplication(
-        lectureId,
-        applicantId,
-        session,
-      )
-    })
+      },
+    )
   }
 
   /**
