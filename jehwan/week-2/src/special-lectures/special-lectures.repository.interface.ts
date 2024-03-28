@@ -8,6 +8,35 @@ import { CreateSpecialLectureModel } from './models/create-special-lecture.model
 export interface ISpecialLecturesRepository {
   /**
    *
+   * @param model CreateSpecialLectureModel
+   * @param session the session for Transaction
+   * @returns lecture's id that created
+   */
+  createLecture(
+    model: CreateSpecialLectureModel,
+    session?: unknown,
+  ): Promise<SpecialLecture>
+
+  /**
+   *
+   * @param lectureId lecture's id
+   * @param session the session for Transaction
+   * @returns SpecialLecture or null
+   */
+  readOneLecture(
+    lectureId: string,
+    session?: unknown,
+  ): Promise<SpecialLecture | null>
+
+  /**
+   *
+   * @param session the session for Transaction
+   * @returns All SpecialLecture
+   */
+  readAllLectures(session?: unknown): Promise<SpecialLecture[]>
+
+  /**
+   *
    * @param lectureId lecture's id
    * @param userId  applicant's id for the lecture
    * @param session the session for Transaction
@@ -35,14 +64,6 @@ export interface ISpecialLecturesRepository {
    *
    * @param lectureId lecture's id
    * @param session the session for Transaction
-   * @returns the number of applicants
-   */
-  count(lectureId: string, session?: unknown): Promise<SpecialLectureCount>
-
-  /**
-   *
-   * @param lectureId lecture's id
-   * @param session the session for Transaction
    * @returns Array of Applications (ensuring the order)
    */
   readAllApplications(
@@ -52,32 +73,11 @@ export interface ISpecialLecturesRepository {
 
   /**
    *
-   * @param model CreateSpecialLectureModel
-   * @param session the session for Transaction
-   * @returns lecture's id that created
-   */
-  createLecture(
-    model: CreateSpecialLectureModel,
-    session?: unknown,
-  ): Promise<SpecialLecture>
-
-  /**
-   *
    * @param lectureId lecture's id
    * @param session the session for Transaction
-   * @returns SpecialLecture or null
+   * @returns the number of applicants
    */
-  readOneLecture(
-    lectureId: string,
-    session?: unknown,
-  ): Promise<SpecialLecture | null>
-
-  /**
-   *
-   * @param session the session for Transaction
-   * @returns All SpecialLecture
-   */
-  readAllLectures(session?: unknown): Promise<SpecialLecture[]>
+  count(lectureId: string, session?: unknown): Promise<SpecialLectureCount>
 
   /**
    *
