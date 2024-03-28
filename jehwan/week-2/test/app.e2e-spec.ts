@@ -5,6 +5,7 @@ import { AppModule } from '../src/app.module'
 import { GenericContainer, StartedTestContainer } from 'testcontainers'
 import { Application } from 'src/special-lectures/models/application.model'
 import { SpecialLectureExceptionMessage } from '../src/special-lectures/models/special-lecture.excpetion.model'
+import { faker } from '@faker-js/faker'
 
 describe('AppController (e2e)', () => {
   let app: INestApplication
@@ -134,7 +135,27 @@ describe('AppController (e2e)', () => {
           error: 'Bad Request',
           statusCode: 400,
         })
-    }, 30000)
+    }, 10000)
+
+    it('should not be possible to apply before the opening date', async () => {
+      const lectureResponse = await request(app.getHttpServer())
+        .post(`/special-lectures`)
+        .send({
+          title: '스파르타 코딩클럽 취업 특강',
+          openingDate: faker.date.future({ refDate: new Date() }),
+          maximum: 30,
+        })
+
+      const lectureId = lectureResponse.body.id
+      await request(app.getHttpServer())
+        .patch(`/special-lectures/${lectureId}/applications/${userId}`)
+        .expect(400)
+        .expect({
+          message: SpecialLectureExceptionMessage.NOT_OPEN_YET,
+          error: 'Bad Request',
+          statusCode: 400,
+        })
+    })
   })
 
   /**
