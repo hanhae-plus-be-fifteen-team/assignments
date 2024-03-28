@@ -136,16 +136,23 @@ export class SpecialLecturesRepositoryImpl
 
   /**
    *
-   * @todo Considering locks in a distributed cluster
+   * @param lectureId lock based on lectureId
    * @param atom A function that guarantees atomicity
    * @returns the result of atom()
    */
   async withLock<T>(
+    lectureId: string,
     atom: (session?: pgPromise.ITask<unknown>) => Promise<T>,
   ): Promise<T> {
     return await this.pg.tx<T>(async session => {
-      // await session.none(`LOCK TABLE special_lectures IN EXCLUSIVE MODE`)
-      return await atom(session)
+      // Lock the 'special_lectures_count' table based on lectureId in EXCLUSIVE MODE
+      await session.any(
+        `SELECT *
+         FROM ${Table.SPECIAL_LECTURE_COUNTS}
+         WHERE lecture_id = $1 FOR UPDATE`,
+        [lectureId],
+      )
+      return atom(session)
     })
   }
 
