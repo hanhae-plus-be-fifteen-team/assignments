@@ -1,7 +1,6 @@
 import { ISpecialLecturesRepository } from './special-lectures.repository.interface'
 import { createDb } from '../database'
 import pgPromise from 'pg-promise'
-import { Mutex } from 'async-mutex'
 import {
   SpecialLectureCountEntity,
   SpecialLectureEntity,
@@ -24,11 +23,9 @@ export class SpecialLecturesRepositoryImpl
   implements ISpecialLecturesRepository
 {
   private readonly pg: pgPromise.IDatabase<unknown>
-  private mutex: Mutex
 
   constructor() {
     this.pg = createDb()
-    this.mutex = new Mutex()
   }
 
   /**
@@ -146,18 +143,10 @@ export class SpecialLecturesRepositoryImpl
   async withLock<T>(
     atom: (session?: pgPromise.ITask<unknown>) => Promise<T>,
   ): Promise<T> {
-    const release = await this.mutex.acquire()
-    try {
-      return await this.pg.tx<T>(async session => {
-        /**
-         * @todo refactoring
-         */
-        // await session.none(`LOCK TABLE special_lectures IN EXCLUSIVE MODE`)
-        return await atom(session)
-      })
-    } finally {
-      release()
-    }
+    return await this.pg.tx<T>(async session => {
+      // await session.none(`LOCK TABLE special_lectures IN EXCLUSIVE MODE`)
+      return await atom(session)
+    })
   }
 
   /**
