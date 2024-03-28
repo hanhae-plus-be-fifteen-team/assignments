@@ -4,6 +4,12 @@ import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm'
 export class Class {
   @PrimaryGeneratedColumn()
   id: number
+
+  @Column()
+  total: number
+
+  @Column()
+  students: string[]
 }
 
 @Entity()
