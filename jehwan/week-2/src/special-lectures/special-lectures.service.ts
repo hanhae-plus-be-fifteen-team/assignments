@@ -41,7 +41,7 @@ export class SpecialLecturesService {
         )
       }
 
-      const countResult = await this.specialLectureServiceRepository.count(
+      const countResult = await this.specialLectureServiceRepository.readCount(
         lectureId,
         session,
       )
@@ -70,6 +70,8 @@ export class SpecialLecturesService {
         applicantId,
         session,
       )
+
+      await this.specialLectureServiceRepository.addCount(lectureId, session)
 
       return this.specialLectureServiceRepository.readOneApplication(
         lectureId,
