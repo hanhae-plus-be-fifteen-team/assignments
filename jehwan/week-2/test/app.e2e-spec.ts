@@ -76,7 +76,7 @@ describe('AppController (e2e)', () => {
     others = []
     for (let i = 0; i < 30; i++) {
       const other = await request(app.getHttpServer()).post(`/users`).send({
-        username: 'a',
+        username: faker.lorem.word(),
       })
       others.push(other.body.id)
     }
@@ -198,6 +198,33 @@ describe('AppController (e2e)', () => {
 
       expect(status).toBe(200)
       expectApplication(body, lectureId, secondUser, false)
+    })
+  })
+
+  /**
+   * (선택) 특강 선택 API
+   */
+  describe('GET /special-lectures', () => {
+    it('should list all special-lectures and a user can select any lecture', async () => {
+      const lectureIds: string[] = []
+
+      for (let i = 0; i < 5; i++) {
+        const lectureResponse = await request(app.getHttpServer())
+          .post(`/special-lectures`)
+          .send({
+            title: faker.lorem.words(3),
+            openingDate: faker.date.past({ refDate: new Date() }),
+            maximum: 30,
+          })
+
+        lectureIds.push(lectureResponse.body.id)
+      }
+
+      await request(app.getHttpServer())
+        .patch(
+          `/special-lectures/${faker.helpers.arrayElement(lectureIds)}/applications/${userId}`,
+        )
+        .expect(200)
     })
   })
 })
