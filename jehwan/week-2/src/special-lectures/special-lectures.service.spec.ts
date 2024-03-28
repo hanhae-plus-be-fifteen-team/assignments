@@ -8,6 +8,7 @@ import {
   setNormalAppliedTrue,
   setNormalAppliedFalse,
 } from './mocks/special-lectures.service.mock'
+import { SpecialLectureExceptionMessage } from './models/special-lecture.excpetion.model'
 
 describe('특강 신청 서비스 유닛 테스트', () => {
   let mockRepo: ReturnType<typeof initMockRepo>
@@ -45,7 +46,7 @@ describe('특강 신청 서비스 유닛 테스트', () => {
 
       // the second request is not ok.
       expect(service.applyForLecture(lectureId, userId)).rejects.toThrow(
-        'Already Applied',
+        SpecialLectureExceptionMessage.ALREADY_APPLIED,
       )
     })
     it('A user should not be able to apply if there are already 30 applications', async () => {
@@ -70,7 +71,7 @@ describe('특강 신청 서비스 유닛 테스트', () => {
        * 31'th applicant 😭
        */
       expect(service.applyForLecture(lectureId, uuidv4())).rejects.toThrow(
-        'Limit Exceeded',
+        SpecialLectureExceptionMessage.LIMIT_EXCEEDED,
       )
     }, 15000)
   })

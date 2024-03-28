@@ -5,13 +5,13 @@ import {
   Get,
   InternalServerErrorException,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
   ValidationPipe,
 } from '@nestjs/common'
 import { SpecialLecturesServiceAdapter } from './special-lectures.service.adapter'
 import { CreateSpecialLecturesDto } from './dto/create-special-lectures.dto'
+import { SpecialLectureException } from './models/special-lecture.excpetion.model'
 
 @Controller('/special-lectures')
 export class SpecialLecturesController {
@@ -37,14 +37,13 @@ export class SpecialLecturesController {
     try {
       return await this.adapter.service.readOneApplication(lectureId, userId)
     } catch (e) {
-      switch (e.message) {
-        case 'Lecture Does Not Exist':
-          throw new BadRequestException('Lecture Does not Exist')
-        default: // fallback
-          throw new InternalServerErrorException('Internal Server Exception', {
-            cause: e,
-          })
+      if (e instanceof SpecialLectureException) {
+        throw this.handleSpecialLectureException(e)
       }
+
+      throw new InternalServerErrorException('Internal Server Exception', {
+        cause: e,
+      })
     }
   }
 
@@ -58,14 +57,13 @@ export class SpecialLecturesController {
     try {
       return await this.adapter.service.readAllApplications(lectureId)
     } catch (e) {
-      switch (e.message) {
-        case 'Lecture Does Not Exist':
-          throw new BadRequestException('Lecture Does not Exist')
-        default: // fallback
-          throw new InternalServerErrorException('Internal Server Exception', {
-            cause: e,
-          })
+      if (e instanceof SpecialLectureException) {
+        throw this.handleSpecialLectureException(e)
       }
+
+      throw new InternalServerErrorException('Internal Server Exception', {
+        cause: e,
+      })
     }
   }
 
@@ -103,20 +101,17 @@ export class SpecialLecturesController {
     try {
       return await this.adapter.service.applyForLecture(lectureId, userId)
     } catch (e) {
-      switch (e.message) {
-        case 'Limit Exceeded':
-          throw new BadRequestException('Limit Exceeded (maximum 30)')
-        case 'Already Applied':
-          throw new BadRequestException('Already Applied')
-        case 'Lecture Does Not Exist':
-          throw new BadRequestException('Lecture Does not Exist')
-        case 'Not Started Yet':
-          throw new BadRequestException('Not Started Yet')
-        default: // fallback
-          throw new InternalServerErrorException('Internal Server Exception', {
-            cause: e,
-          })
+      if (e instanceof SpecialLectureException) {
+        throw this.handleSpecialLectureException(e)
       }
+
+      throw new InternalServerErrorException('Internal Server Exception', {
+        cause: e,
+      })
     }
+  }
+
+  private handleSpecialLectureException(e: SpecialLectureException) {
+    return new BadRequestException(e.message)
   }
 }
