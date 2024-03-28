@@ -110,6 +110,8 @@ export class SpecialLecturesController {
           throw new BadRequestException('Already Applied')
         case 'Lecture Does Not Exist':
           throw new BadRequestException('Lecture Does not Exist')
+        case 'Not Started Yet':
+          throw new BadRequestException('Not Started Yet')
         default: // fallback
           throw new InternalServerErrorException('Internal Server Exception', {
             cause: e,

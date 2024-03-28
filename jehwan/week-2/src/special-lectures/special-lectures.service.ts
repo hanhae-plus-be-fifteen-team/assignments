@@ -15,6 +15,7 @@ export class SpecialLecturesService {
    * @throws Error 'Limit Exceeded' when count >= 30
    * @throws Error 'Already Applied' when applied === true
    * @throws Error 'Lecture Does Not Exist' when there is no matched lecture
+   * @throws Error 'Not Started Yet' when current time is before the openingDate
    */
   async applyForLecture(
     lectureId: string,
@@ -26,6 +27,10 @@ export class SpecialLecturesService {
 
       if (!lecture) {
         throw new Error('Lecture Does Not Exist')
+      }
+
+      if (new Date() < lecture.openingDate) {
+        throw new Error('Not Started Yet')
       }
 
       const countResult = await this.specialLectureServiceRepository.count(
