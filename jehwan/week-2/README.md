@@ -53,6 +53,24 @@ Persistence 를 위해 `RepositoryInterface`를 작성했습니다. 비즈니스
 
 ![ERD](./assets/ERD.png)
 
+# E2E test
+
+- (핵심) 특강 신청 API
+    - [x] 동일한 신청자는 한 번의 수강 신청만 성공할 수
+      있습니다. [링크](https://github.com/hanhae-plus-be-fifteen-team/assignments/blob/578ef9c2208994468a53dbfc99e56d6cb36efa40/jehwan/week-2/test/app.e2e-spec.ts#L103)
+    - [x] 이미 신청자가 30명이 초과되면 이후 신청자는 요청을
+      실패합니다. [링크](https://github.com/hanhae-plus-be-fifteen-team/assignments/blob/578ef9c2208994468a53dbfc99e56d6cb36efa40/jehwan/week-2/test/app.e2e-spec.ts#L118)
+    - [x] 신청 일자 이전에는 요청이
+      실패합니다. [링크](https://github.com/hanhae-plus-be-fifteen-team/assignments/blob/578ef9c2208994468a53dbfc99e56d6cb36efa40/jehwan/week-2/test/app.e2e-spec.ts#L140)
+- (기본) 특강 신청 여부 조회 API
+    - [x] 특강 신청에 성공한 사용자는
+      성공했음을 [링크](https://github.com/hanhae-plus-be-fifteen-team/assignments/blob/578ef9c2208994468a53dbfc99e56d6cb36efa40/jehwan/week-2/test/app.e2e-spec.ts#L183)
+    - [x] 특강 등록자 명단에 없는 사용자는
+      실패 [링크](https://github.com/hanhae-plus-be-fifteen-team/assignments/blob/578ef9c2208994468a53dbfc99e56d6cb36efa40/jehwan/week-2/test/app.e2e-spec.ts#L193)
+- (선택) 특강 선택 API
+    - [x] 단 한번의 특강을 위한 것이 아닌 날짜별로 특강이 존재할 수 있는 범용적인 서비스로 변화시켜
+      봅니다. [링크](https://github.com/hanhae-plus-be-fifteen-team/assignments/blob/578ef9c2208994468a53dbfc99e56d6cb36efa40/jehwan/week-2/test/app.e2e-spec.ts#L208)
+
 # 서버 실행
 
 ### Postgres (Docker Compose)
