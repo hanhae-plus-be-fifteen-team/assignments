@@ -2,6 +2,10 @@ import { ISpecialLecturesRepository } from './special-lectures.repository.interf
 import { Application } from './models/application.model'
 import { CreateSpecialLectureModel } from './models/create-special-lecture.model'
 import { SpecialLecture } from './models/special-lecture.model'
+import {
+  SpecialLectureException,
+  SpecialLectureExceptionMessage,
+} from './models/special-lecture.excpetion.model'
 
 export class SpecialLecturesService {
   constructor(
@@ -15,7 +19,7 @@ export class SpecialLecturesService {
    * @throws Error 'Limit Exceeded' when count >= 30
    * @throws Error 'Already Applied' when applied === true
    * @throws Error 'Lecture Does Not Exist' when there is no matched lecture
-   * @throws Error 'Not Started Yet' when current time is before the openingDate
+   * @throws Error 'Not Open Yet' when current time is before the openingDate
    */
   async applyForLecture(
     lectureId: string,
@@ -26,11 +30,15 @@ export class SpecialLecturesService {
         await this.specialLectureServiceRepository.readOneLecture(lectureId)
 
       if (!lecture) {
-        throw new Error('Lecture Does Not Exist')
+        throw new SpecialLectureException(
+          SpecialLectureExceptionMessage.LECTURE_DOES_NOT_EXIST,
+        )
       }
 
       if (new Date() < lecture.openingDate) {
-        throw new Error('Not Started Yet')
+        throw new SpecialLectureException(
+          SpecialLectureExceptionMessage.NOT_OPEN_YET,
+        )
       }
 
       const countResult = await this.specialLectureServiceRepository.count(
@@ -39,7 +47,9 @@ export class SpecialLecturesService {
       )
 
       if (countResult.count >= countResult.maximum) {
-        throw new Error('Limit Exceeded')
+        throw new SpecialLectureException(
+          SpecialLectureExceptionMessage.LIMIT_EXCEEDED,
+        )
       }
 
       const prevResult =
@@ -50,7 +60,9 @@ export class SpecialLecturesService {
         )
 
       if (prevResult.applied) {
-        throw new Error('Already Applied')
+        throw new SpecialLectureException(
+          SpecialLectureExceptionMessage.ALREADY_APPLIED,
+        )
       }
 
       await this.specialLectureServiceRepository.createApplication(
@@ -113,7 +125,9 @@ export class SpecialLecturesService {
       await this.specialLectureServiceRepository.readOneLecture(lectureId)
 
     if (!lecture) {
-      throw new Error('Lecture Does Not Exist')
+      throw new SpecialLectureException(
+        SpecialLectureExceptionMessage.LECTURE_DOES_NOT_EXIST,
+      )
     }
 
     return this.specialLectureServiceRepository.readAllApplications(lectureId)
